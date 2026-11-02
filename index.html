@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllMailSpot - Live Mailboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CodeMirror 5 CDN for Colorful HTML Code Editing -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
+
+    <style>
+        .CodeMirror {
+            height: 100%;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .CodeMirror-activeline-background { background: rgba(99, 102, 241, 0.15) !important; }
+        .cm-search-highlight { background-color: #fef08a !important; border: 1px solid #eab308; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen font-sans flex flex-col justify-between transition-colors duration-200">
+
+    <div>
+        <!-- Top Navigation Bar -->
+        <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-30 px-4 py-3 shadow-sm transition-colors duration-200">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center">
+                        <i class="fa-solid fa-envelope-open-text text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                            AllMailSpot <span class="text-[10px] bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded font-bold uppercase">Pro</span>
+                        </h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Live Multi-ID Streamer & Inspector</p>
+                    </div>
+                </div>
+
+                <!-- Controls & Search -->
+                <div class="flex items-center space-x-3 flex-wrap">
+                    <!-- Search Input -->
+                    <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm focus-within:border-green-600">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderFilteredGrids()" placeholder="Search emails..." class="bg-transparent text-xs text-slate-700 dark:text-slate-200 font-medium outline-none w-36 sm:w-48">
+                    </div>
+
+                    <!-- DATE RANGE PICKERS -->
+                    <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 shadow-sm text-xs">
+                        <i class="fa-regular fa-calendar text-slate-500 dark:text-slate-400"></i>
+                        <input type="date" id="dateFrom" onchange="startFreshSync()" title="From Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer">
+                        <span class="text-slate-400 font-bold">-</span>
+                        <input type="date" id="dateTo" onchange="startFreshSync()" title="To Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer">
+                    </div>
+
+                    <!-- THEME TOGGLE BUTTON -->
+                    <button onclick="toggleTheme()" title="Toggle Theme" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs transition shadow-sm">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <button onclick="toggleConfigModal()" class="px-3 py-1.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition">
+                        <i class="fa-solid fa-key text-green-600 dark:text-green-400"></i>
+                        <span>Accounts (<span id="accountCountBadge">3</span>)</span>
+                    </button>
+
+                    <button onclick="startFreshSync()" id="fetchBtn" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-2 transition shadow-md shadow-green-200 dark:shadow-none">
+                        <i class="fa-solid fa-rotate-right" id="refreshSpinner"></i>
+                        <span>Sync Live</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <main class="max-w-7xl mx-auto p-4 md:p-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 rounded-xl shadow-xs mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors duration-200">
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center space-x-2">
+                        <span>Displaying <span id="mailCount" class="font-bold text-slate-900 dark:text-white">0</span> emails</span>
+                        <span id="syncStatusBadge" class="hidden text-[10px] bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-semibold animate-pulse border border-green-200 dark:border-green-800">Fetching chunk (7)...</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0" id="sourceFiltersContainer">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-green-600"></i>Sources:</span>
+                </div>
+
+                <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-2 shrink-0">
+                    <span id="timerCountdown" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md font-mono text-[11px] border border-slate-200 dark:border-slate-700">Auto-syncing in 10:00</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+            </div>
+
+            <!-- DEFAULT FULL-WIDTH GRID (5 Columns Desktop / 2 Mobile) -->
+            <div id="emailGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Dynamic Cards Populated Here -->
+            </div>
+
+            <div id="emptyState" class="hidden text-center py-24 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
+                <i class="fa-solid fa-inbox text-4xl text-slate-300 dark:text-slate-700 mb-3"></i>
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">No Emails Found</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">Make sure your Yahoo App Passwords and Spot IDs are correctly configured and match the target date range.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-10 transition-colors duration-200">
+        <p>&copy; 2026 AllMailSpot. All rights reserved. &bull; Designed By <strong class="text-green-600 dark:text-green-400 font-bold">"Adimon"</strong></p>
+    </footer>
+
+    <!-- FULLSCREEN SPLIT INSPECTOR OVERLAY -->
+    <div id="inspectorOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex hidden">
+        <div class="w-full md:w-5/12 lg:w-4/12 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-full shadow-2xl transition-colors duration-200">
+            <div class="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-2">
+                    <i class="fa-solid fa-layer-group text-green-600 dark:text-green-400"></i>
+                    <span>All Emails Stream</span>
+                </span>
+                <button onclick="closeInspector()" class="px-2.5 py-1 text-xs bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded flex items-center space-x-1 shadow-xs transition">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Close View</span>
+                </button>
+            </div>
+
+            <div id="sideEmailGrid" class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-2.5 align-content-start bg-slate-50/50 dark:bg-slate-950/50"></div>
+        </div>
+
+        <div class="hidden md:flex flex-1 bg-white dark:bg-slate-900 flex-col h-full transition-colors duration-200">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs mr-2">
+                        <button onclick="navigateMail('prev')" id="prevMailBtn" title="Previous Email (Left Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <span class="text-slate-300 dark:text-slate-700 font-bold">|</span>
+                        <button onclick="navigateMail('next')" id="nextMailBtn" title="Next Email (Right Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs">
+                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition">
+                            <i class="fa-solid fa-eye mr-1"></i> Live Preview
+                        </button>
+                        <button onclick="switchTab('editor')" id="tab-editor" class="px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-200 font-semibold transition">
+                            <i class="fa-solid fa-code text-orange-500 mr-1"></i> HTML Editor
+                        </button>
+                    </div>
+
+                    <button onclick="copyHeadContent()" class="px-3 py-1.5 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                        <i class="fa-solid fa-copy text-blue-600 dark:text-blue-400"></i>
+                        <span>Copy &lt;head&gt;</span>
+                    </button>
+
+                    <button onclick="findHeadTag()" class="px-3 py-1.5 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                        <i class="fa-solid fa-magnifying-glass text-amber-600 dark:text-amber-400"></i>
+                        <span>Find &lt;/head&gt;</span>
+                    </button>
+
+                    <button onclick="disableEmailLinks()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                        <i class="fa-solid fa-link-slash text-rose-600 dark:text-rose-400"></i>
+                        <span>Remove Dots in Links</span>
+                    </button>
+                </div>
+                
+                <button onclick="closeInspector()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-base transition ml-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="px-5 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+                <div class="flex items-center space-x-2">
+                    <h2 id="modalSubject" class="font-bold text-slate-900 dark:text-white text-sm truncate">Select an Email</h2>
+                    <button onclick="copyDirectText('modalSubject', 'Subject')" title="Copy Subject" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded text-[10px] font-semibold flex items-center space-x-1 shrink-0 transition">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center text-xs text-slate-500 dark:text-slate-400 gap-x-4 gap-y-1">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="text-slate-400">From:</span> 
+                        <span id="modalFromName" class="text-green-600 dark:text-green-400 font-bold"></span>
+                        <button onclick="copyDirectText('modalFromName', 'From Name')" title="Copy From Name" class="px-1.5 py-0.2 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded text-[9px] font-semibold flex items-center space-x-1 transition">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                        <span>(<span id="modalFromEmail"></span>)</span>
+                    </div>
+                    <div><span class="text-slate-400">Account:</span> <span id="modalAccount" class="text-slate-700 dark:text-slate-300 font-medium"></span></div>
+                    <div><span class="text-slate-400">Date:</span> <span id="modalDate" class="text-slate-700 dark:text-slate-300 font-medium"></span></div>
+                    <div><span class="text-slate-400">Source:</span> <span id="modalSource" class="text-purple-600 dark:text-purple-400 font-bold"></span></div>
+                </div>
+            </div>
+
+            <div class="flex-1 relative overflow-hidden bg-white dark:bg-slate-900">
+                <div id="view-preview" class="absolute inset-0 bg-white dark:bg-slate-900">
+                    <iframe id="previewIframe" class="w-full h-full border-0 bg-white dark:bg-slate-900"></iframe>
+                </div>
+
+                <div id="view-editor" class="absolute inset-0 bg-white dark:bg-slate-900 hidden flex flex-col">
+                    <div class="p-2 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-950">
+                        <span class="font-medium text-slate-500 dark:text-slate-400">Colorful Code Editor (Live edits sync directly)</span>
+                        <div class="flex items-center space-x-2">
+                            <span id="headSearchStatus" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hidden"></span>
+                            <button onclick="applyEditorChanges()" class="px-3 py-1 bg-green-600 text-white rounded font-semibold hover:bg-green-700 shadow-xs">Update Preview</button>
+                        </div>
+                    </div>
+                    <div id="codeMirrorContainer" class="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-950"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 dark:bg-slate-800 text-white px-4 py-2.5 rounded-lg shadow-2xl transition transform translate-y-20 opacity-0 flex items-center space-x-2 z-50 text-xs font-medium border border-slate-700">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Notification</span>
+    </div>
+
+    <!-- ACCOUNTS CONFIG MODAL -->
+    <div id="configModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-green-600 dark:text-green-400"></i>
+                    <span>Configure Yahoo Credentials</span>
+                </h3>
+                <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Enter your credentials in format: <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-green-600 dark:text-green-400 font-mono">imappassword, allMailSpotid</code> (One per line).</p>
+            
+            <textarea id="credentialsInput" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-800 dark:text-slate-200 outline-none focus:border-green-600 dark:focus:border-green-500 focus:bg-white dark:focus:bg-slate-900 transition" placeholder="imappassword1, spotid1@yahoo.com&#10;imappassword2, spotid2@yahoo.com&#10;imappassword3, spotid3@yahoo.com"></textarea>
+
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="toggleConfigModal()" class="px-4 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium">Cancel</button>
+                <button onclick="saveCredentials()" class="px-4 py-1.5 text-xs bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow-xs">Save Credentials</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fetchedEmails = [];
+        let displayedFilteredEmails = [];
+        let activeIndex = null;
+        let cmEditor = null;
+        let activeSearchHighlightMark = null;
+
+        let isSyncRunning = false;
+        let countdownSeconds = 600;
+        let activeSourceFilters = new Set();
+        const CHUNK_SIZE = 7;
+        const defaultCreds = "imappassword1, allMailSpotid1@yahoo.com\nimappassword2, allMailSpotid2@yahoo.com\nimappassword3, allMailSpotid3@yahoo.com";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateFrom').value = today;
+            document.getElementById('dateTo').value = today;
+
+            if (!localStorage.getItem('yahoo_creds')) {
+                localStorage.setItem('yahoo_creds', defaultCreds);
+            }
+            document.getElementById('credentialsInput').value = localStorage.getItem('yahoo_creds');
+            
+            initTheme();
+            updateAccountBadge();
+            initCodeMirror();
+
+            startFreshSync();
+            initTenMinuteScheduler();
+            initKeyboardNavigation();
+        });
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('allmailspot_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = "fa-solid fa-sun";
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').className = "fa-solid fa-moon";
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('allmailspot_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+            
+            if (cmEditor) {
+                cmEditor.setOption("theme", isDark ? "dracula" : "default");
+            }
+        }
+
+        function initKeyboardNavigation() {
+            window.addEventListener('keydown', (e) => {
+                const overlay = document.getElementById('inspectorOverlay');
+                if (overlay.classList.contains('hidden')) return;
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') return;
+
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    navigateMail('prev');
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    navigateMail('next');
+                } else if (e.key === 'Escape') {
+                    closeInspector();
+                }
+            });
+        }
+
+        function initTenMinuteScheduler() {
+            setInterval(() => {
+                countdownSeconds--;
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = 600;
+                    startContinuousSync();
+                }
+                updateCountdownDisplay();
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            const mins = Math.floor(countdownSeconds / 60);
+            const secs = countdownSeconds % 60;
+            const formatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            document.getElementById('timerCountdown').textContent = `Auto-syncing in ${formatted}`;
+        }
+
+        function startFreshSync() {
+            fetchedEmails = [];
+            activeSourceFilters.clear();
+            renderFilteredGrids();
+            startContinuousSync();
+        }
+
+        async function startContinuousSync() {
+            if (isSyncRunning) return;
+            const accounts = parseStoredCredentials();
+            if (accounts.length === 0) return;
+
+            isSyncRunning = true;
+            const dateFromVal = document.getElementById('dateFrom').value;
+            const dateToVal = document.getElementById('dateTo').value;
+            const spinner = document.getElementById('refreshSpinner');
+            const syncBadge = document.getElementById('syncStatusBadge');
+
+            spinner.classList.add('fa-spin');
+            syncBadge.classList.remove('hidden');
+
+            let offset = 0;
+            let hasMore = true;
+
+            try {
+                while (hasMore) {
+                    const res = await fetch('/api/fetch-chunk', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            accounts, 
+                            date: dateFromVal, 
+                            date_to: dateToVal,
+                            offset: offset, 
+                            limit: CHUNK_SIZE 
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.status === 'success' && data.emails.length > 0) {
+                        data.emails.forEach(newEmail => {
+                            if (!fetchedEmails.some(e => e.id === newEmail.id)) {
+                                fetchedEmails.push(newEmail);
+                                if (!activeSourceFilters.has(newEmail.source)) {
+                                    activeSourceFilters.add(newEmail.source);
+                                }
+                            }
+                        });
+
+                        updateSourceFilterUI();
+                        renderFilteredGrids();
+
+                        offset += CHUNK_SIZE;
+                        if (data.emails.length < CHUNK_SIZE) {
+                            hasMore = false;
+                        }
+                        await new Promise(r => setTimeout(r, 300));
+                    } else {
+                        hasMore = false;
+                    }
+                }
+            } catch (err) {
+                console.error("Continuous Sync Engine Error:", err);
+            } finally {
+                isSyncRunning = false;
+                countdownSeconds = 600;
+                spinner.classList.remove('fa-spin');
+                syncBadge.classList.add('hidden');
+            }
+        }
+
+        function updateSourceFilterUI() {
+            const container = document.getElementById('sourceFiltersContainer');
+            const labelHtml = '<span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-green-600"></i>Sources:</span>';
+            const allSources = [...new Set(fetchedEmails.map(e => e.source))].sort();
+            
+            if (activeSourceFilters.size === 0 && allSources.length > 0) {
+                allSources.forEach(s => activeSourceFilters.add(s));
+            }
+
+            let checkboxesHtml = labelHtml;
+            allSources.forEach(source => {
+                const isChecked = activeSourceFilters.has(source) ? 'checked' : '';
+                checkboxesHtml += `
+                    <label class="inline-flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-md text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <input type="checkbox" value="${source}" ${isChecked} onchange="toggleSourceFilter('${source}', this.checked)" class="rounded text-green-600 focus:ring-green-500 h-3.5 w-3.5">
+                        <span class="text-slate-700 dark:text-slate-200 font-medium">${source}</span>
+                    </label>
+                `;
+            });
+
+            container.innerHTML = checkboxesHtml;
+        }
+
+        function toggleSourceFilter(source, isChecked) {
+            if (isChecked) {
+                activeSourceFilters.add(source);
+            } else {
+                activeSourceFilters.delete(source);
+            }
+            renderFilteredGrids();
+        }
+
+        function renderFilteredGrids() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            displayedFilteredEmails = fetchedEmails.filter(mail => {
+                if (!activeSourceFilters.has(mail.source)) return false;
+
+                if (searchQuery) {
+                    const matchSubject = mail.subject.toLowerCase().includes(searchQuery);
+                    const matchFromName = mail.from_name.toLowerCase().includes(searchQuery);
+                    const matchFromEmail = mail.from_email.toLowerCase().includes(searchQuery);
+                    const matchAccount = mail.account.toLowerCase().includes(searchQuery);
+                    return matchSubject || matchFromName || matchFromEmail || matchAccount;
+                }
+                return true;
+            });
+
+            renderGrids(displayedFilteredEmails);
+        }
+
+        function renderGrids(emails) {
+            const mainGrid = document.getElementById('emailGrid');
+            const sideGrid = document.getElementById('sideEmailGrid');
+            const emptyState = document.getElementById('emptyState');
+            document.getElementById('mailCount').textContent = emails.length;
+
+            mainGrid.innerHTML = '';
+            sideGrid.innerHTML = '';
+
+            if (emails.length === 0 && !isSyncRunning) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            emails.forEach((mail, idx) => {
+                const mainCard = createCardElement(mail, idx);
+                mainGrid.appendChild(mainCard);
+
+                const sideCard = createCardElement(mail, idx, true);
+                sideGrid.appendChild(sideCard);
+            });
+        }
+
+        function createCardElement(mail, idx, isSide = false) {
+            const card = document.createElement('div');
+            const isActive = isSide && activeIndex === idx;
+
+            card.className = `bg-white dark:bg-slate-900 border ${isActive ? 'border-green-600 ring-2 ring-green-600/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500'} rounded-xl p-3 cursor-pointer transition flex flex-col justify-between shadow-xs hover:shadow-md group`;
+            card.onclick = () => selectCardById(mail.id);
+
+            card.innerHTML = `
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[130px]" title="${escapeHTML(mail.from_name)}">${escapeHTML(mail.from_name)}</span>
+                        <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950 px-1.5 py-0.5 rounded border border-green-100 dark:border-green-900">${escapeHTML(mail.source)}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate" title="${escapeHTML(mail.from_email)}">${escapeHTML(mail.from_email)}</div>
+                    <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-xs line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition mt-1" title="${escapeHTML(mail.subject)}">${escapeHTML(mail.subject)}</h4>
+                </div>
+
+                <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                    <span class="truncate max-w-[100px]">${escapeHTML(mail.account.split('@')[0])}</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-700 group-hover:text-green-600 dark:group-hover:text-green-400 transition"></i>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function selectCardById(mailId) {
+            const index = displayedFilteredEmails.findIndex(e => e.id === mailId);
+            if (index === -1) return;
+            activeIndex = index;
+            const email = displayedFilteredEmails[index];
+
+            document.getElementById('modalSubject').textContent = email.subject;
+            document.getElementById('modalFromName').textContent = email.from_name;
+            document.getElementById('modalFromEmail').textContent = email.from_email;
+            document.getElementById('modalAccount').textContent = email.account;
+            document.getElementById('modalDate').textContent = email.date;
+            document.getElementById('modalSource').textContent = email.source;
+
+            cmEditor.setValue(email.content);
+            updateIframe(email.content);
+
+            renderFilteredGrids();
+
+            document.getElementById('inspectorOverlay').classList.remove('hidden');
+            setTimeout(() => cmEditor.refresh(), 50);
+        }
+
+        function navigateMail(direction) {
+            if (displayedFilteredEmails.length === 0 || activeIndex === null) return;
+
+            if (direction === 'prev') {
+                if (activeIndex > 0) {
+                    activeIndex--;
+                } else {
+                    activeIndex = displayedFilteredEmails.length - 1;
+                }
+            } else if (direction === 'next') {
+                if (activeIndex < displayedFilteredEmails.length - 1) {
+                    activeIndex++;
+                } else {
+                    activeIndex = 0;
+                }
+            }
+
+            const targetMail = displayedFilteredEmails[activeIndex];
+            selectCardById(targetMail.id);
+        }
+
+        function copyStringToClipboard(text, successMessage) {
+            if (!text) return;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMessage);
+                }).catch(() => {
+                    fallbackCopy(text, successMessage);
+                });
+            } else {
+                fallbackCopy(text, successMessage);
+            }
+        }
+
+        function fallbackCopy(text, successMessage) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.left = "-9999px";
+            textarea.style.top = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) showToast(successMessage);
+                else showToast('Unable to copy text.');
+            } catch (err) {
+                showToast('Failed to copy text.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function copyHeadContent() {
+            const code = cmEditor.getValue();
+            const lowerCode = code.toLowerCase();
+            const headEndIndex = lowerCode.indexOf('</head>');
+
+            let headText = "";
+            if (headEndIndex !== -1) {
+                headText = code.substring(0, headEndIndex + 7);
+            } else {
+                const match = code.match(/[\s\S]*?<\/head>/i);
+                headText = match ? match[0] : code.substring(0, 2500);
+            }
+
+            copyStringToClipboard(headText, 'Copied content up to </head> tag!');
+        }
+
+        function copyDirectText(elementId, label) {
+            const text = document.getElementById(elementId).textContent;
+            copyStringToClipboard(text, `Copied ${label}!`);
+        }
+
+        function disableEmailLinks() {
+            let code = cmEditor.getValue();
+            const tldRegex = /\.(com|net|co|ai|io|app|shop|store|org|me|design|blog|info|in|biz|us|uk|xyz|dev|site|tech|edu|gov|png|jpg|jpeg|gif|svg|css|js)\b/gi;
+            code = code.replace(tldRegex, '$1');
+
+            cmEditor.setValue(code);
+            updateIframe(code);
+            showToast('Removed all dots (.) from links and extensions!');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        function initCodeMirror() {
+            const isDark = document.documentElement.classList.contains('dark');
+            cmEditor = CodeMirror(document.getElementById('codeMirrorContainer'), {
+                mode: 'htmlmixed',
+                lineNumbers: true,
+                styleActiveLine: true,
+                autoCloseTags: true,
+                autoCloseBrackets: true,
+                tabSize: 2,
+                indentUnit: 2,
+                lineWrapping: true,
+                theme: isDark ? 'dracula' : 'default'
+            });
+        }
+
+        function toggleConfigModal() {
+            document.getElementById('configModal').classList.toggle('hidden');
+        }
+
+        function updateAccountBadge() {
+            const raw = localStorage.getItem('yahoo_creds') || '';
+            const count = raw.split('\n').filter(line => line.trim() !== '').length;
+            document.getElementById('accountCountBadge').textContent = count;
+        }
+
+        function saveCredentials() {
+            const val = document.getElementById('credentialsInput').value;
+            localStorage.setItem('yahoo_creds', val);
+            updateAccountBadge();
+            toggleConfigModal();
+            startFreshSync();
+        }
+
+        function parseStoredCredentials() {
+            const raw = localStorage.getItem('yahoo_creds') || '';
+            const lines = raw.split('\n');
+            const parsed = [];
+            for (let line of lines) {
+                const parts = line.split(',');
+                if (parts.length >= 2) {
+                    parsed.push({
+                        app_password: parts[0].trim(),
+                        spot_id: parts[1].trim()
+                    });
+                }
+            }
+            return parsed;
+        }
+
+        function closeInspector() {
+            document.getElementById('inspectorOverlay').classList.add('hidden');
+            activeIndex = null;
+        }
+
+        function switchTab(tab) {
+            const previewView = document.getElementById('view-preview');
+            const editorView = document.getElementById('view-editor');
+            const tabPreviewBtn = document.getElementById('tab-preview');
+            const tabEditorBtn = document.getElementById('tab-editor');
+
+            if (tab === 'preview') {
+                previewView.classList.remove('hidden');
+                editorView.classList.add('hidden');
+                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
+                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
+            } else {
+                previewView.classList.add('hidden');
+                editorView.classList.remove('hidden');
+                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
+                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
+                cmEditor.refresh();
+            }
+        }
+
+        function findHeadTag() {
+            switchTab('editor');
+
+            if (activeSearchHighlightMark) {
+                activeSearchHighlightMark.clear();
+                activeSearchHighlightMark = null;
+            }
+
+            const cursor = cmEditor.getSearchCursor('</head>', { line: 0, ch: 0 }, { caseFold: true });
+            const statusEl = document.getElementById('headSearchStatus');
+
+            if (cursor.findNext()) {
+                cmEditor.setSelection(cursor.from(), cursor.to());
+                cmEditor.scrollIntoView({ from: cursor.from(), to: cursor.to() }, 100);
+                activeSearchHighlightMark = cmEditor.markText(cursor.from(), cursor.to(), { className: 'cm-search-highlight' });
+                
+                statusEl.textContent = 'Found </head> tag!';
+                statusEl.classList.remove('hidden');
+            } else {
+                statusEl.textContent = 'No </head> tag found';
+                statusEl.classList.remove('hidden');
+            }
+
+            setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+
+        function updateIframe(htmlContent) {
+            const iframe = document.getElementById('previewIframe');
+            iframe.srcdoc = htmlContent;
+        }
+
+        function applyEditorChanges() {
+            const newContent = cmEditor.getValue();
+            updateIframe(newContent);
+            switchTab('preview');
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
+    </script>
+</body>
+</html>
