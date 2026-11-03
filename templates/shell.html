@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllMailSpot Portal</title>
+    <style>
+        body { background: #0f172a; color: #94a3b8; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loading { text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="appContainer" style="width:100%; height:100%;">
+        <div class="loading">
+            <h3>Initializing secure workspace...</h3>
+        </div>
+    </div>
+
+    <script>
+        // Securely fetch and inject the real application code at runtime
+        (async function() {
+            try {
+                const response = await fetch('/api/load-payload');
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    // Decode Base64 payload back to HTML string
+                    const decodedHtml = atob(data.payload);
+                    
+                    // Replace shell content with the actual functional dashboard
+                    document.open();
+                    document.write(decodedHtml);
+                    document.close();
+                } else {
+                    document.getElementById('appContainer').innerHTML = '<h3 style="color:#f43f5e;">Session expired. Please log in again.</h3>';
+                    setTimeout(() => window.location.href = '/', 2000);
+                }
+            } catch (err) {
+                console.error("Payload loading error");
+            }
+        })();
+    </script>
+</body>
+</html>
