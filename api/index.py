@@ -1,6 +1,7 @@
 import imaplib
 import email
 import base64
+import hashlib
 import requests
 from email.header import decode_header
 from datetime import datetime
@@ -19,32 +20,55 @@ def decode_secure_string(encoded_str: str) -> str:
     except Exception:
         return encoded_str
 
-def verify_external_credentials(input_id: str, input_pass: str) -> bool:
-    """Fetches remote auth.json, decrypts credentials, and verifies input with logging."""
+def verify_external_credentials(input_id: str, input_pass: str):
+    """Fetches remote auth.json, decrypts credentials, and returns user pass hash if valid."""
     try:
         target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
-        print(f"DEBUG: Fetching auth from URL: {target_url}") # Will show in Vercel logs
-        
         response = requests.get(target_url, timeout=5)
-        print(f"DEBUG: GitHub Response Status: {response.status_code}")
-        
         if response.status_code != 200:
-            print(f"DEBUG: Failed to fetch auth.json. Response: {response.text}")
-            return False
+            return None
             
         credentials_list = response.json()
-        
         for record in credentials_list:
             stored_id = decode_secure_string(record.get("id_enc", ""))
             stored_pass = decode_secure_string(record.get("pass_enc", ""))
             
             if input_id.strip() == stored_id.strip() and input_pass == stored_pass:
-                return True
+                # Return hash of the verified password for secure session fingerprinting
+                return hashlib.sha256(stored_pass.encode('utf-8')).hexdigest()
+        return None
+    except Exception:
+        return None
+
+def validate_active_session() -> bool:
+    """Checks if the session is valid and ensures the password hasn't been changed in auth.json."""
+    if not session.get("authenticated") or not session.get("user") or not session.get("pass_hash"):
+        return False
+    
+    try:
+        target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
+        response = requests.get(target_url, timeout=4)
+        if response.status_code != 200:
+            return True # Fallback trust if GitHub is temporarily unreachable
+            
+        credentials_list = response.json()
+        current_user = session.get("user")
+        stored_pass_hash = session.get("pass_hash")
+        
+        for record in credentials_list:
+            stored_id = decode_secure_string(record.get("id_enc", ""))
+            if stored_id.strip().lower() == current_user.strip().lower():
+                actual_pass = decode_secure_string(record.get("pass_enc", ""))
+                actual_hash = hashlib.sha256(actual_pass.encode('utf-8')).hexdigest()
                 
+                # If password was changed in auth.json, hashes won't match -> invalidate session!
+                if actual_hash == stored_pass_hash:
+                    return True
+                else:
+                    return False
         return False
-    except Exception as e:
-        print(f"DEBUG EXCEPTION in verify_external_credentials: {str(e)}")
-        return False
+    except Exception:
+        return True
 
 
 # --- IMAP & DECODING HELPERS ---
@@ -120,9 +144,10 @@ def detect_sending_source(msg, from_email):
 
 @app.route("/")
 def home():
-    if session.get("authenticated"):
-        # Serve the decoy shell so "View Source" shows non-working wrapper code
+    if validate_active_session():
+        # Serve the decoy shell (which loads script.html) while keeping session persistent
         return render_template("shell.html")
+    session.clear()
     return render_template("index.html")
 
 @app.route("/api/login", methods=["POST"])
@@ -131,8 +156,12 @@ def login_api():
     username = data.get("username", "")
     password = data.get("password", "")
     
-    if verify_external_credentials(username, password):
+    pass_hash = verify_external_credentials(username, password)
+    if pass_hash:
+        session.permanent = True # Keeps session active across browser restarts/exits
         session["authenticated"] = True
+        session["user"] = username.strip()
+        session["pass_hash"] = pass_hash
         return jsonify({"status": "success", "redirect": "/"})
     
     return jsonify({"status": "error", "message": "Invalid access credentials"}), 401
@@ -143,18 +172,17 @@ def logout_api():
     return jsonify({"status": "success"})
 
 
-# --- SECURE PAYLOAD LOADER FOR REAL FUNCTIONALITY ---
+# --- SECURE PAYLOAD LOADER ---
 @app.route("/api/load-payload", methods=["GET"])
 def load_payload():
-    if not session.get("authenticated"):
+    if not validate_active_session():
+        session.clear()
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
     
     try:
-        # Read your actual application code (formerly script.html) from templates
         with open("templates/script.html", "r", encoding="utf-8") as f:
             real_code = f.read()
             
-        # Encode the real code in Base64 so it travels securely without plaintext inspection
         encoded_payload = base64.b64encode(real_code.encode("utf-8")).decode("utf-8")
         return jsonify({"status": "success", "payload": encoded_payload})
     except Exception as e:
@@ -164,7 +192,8 @@ def load_payload():
 # --- PROTECTED IMAP CHUNK FETCHING ---
 @app.route("/api/fetch-chunk", methods=["POST"])
 def fetch_chunk_api():
-    if not session.get("authenticated"):
+    if not validate_active_session():
+        session.clear()
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
     data = request.json or {}
