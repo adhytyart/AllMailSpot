@@ -20,20 +20,30 @@ def decode_secure_string(encoded_str: str) -> str:
         return encoded_str
 
 def verify_external_credentials(input_id: str, input_pass: str) -> bool:
+    """Fetches remote auth.json, decrypts credentials, and verifies input with logging."""
     try:
         target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
+        print(f"DEBUG: Fetching auth from URL: {target_url}") # Will show in Vercel logs
+        
         response = requests.get(target_url, timeout=5)
+        print(f"DEBUG: GitHub Response Status: {response.status_code}")
+        
         if response.status_code != 200:
+            print(f"DEBUG: Failed to fetch auth.json. Response: {response.text}")
             return False
             
         credentials_list = response.json()
+        
         for record in credentials_list:
             stored_id = decode_secure_string(record.get("id_enc", ""))
             stored_pass = decode_secure_string(record.get("pass_enc", ""))
+            
             if input_id.strip() == stored_id.strip() and input_pass == stored_pass:
                 return True
+                
         return False
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG EXCEPTION in verify_external_credentials: {str(e)}")
         return False
 
 
