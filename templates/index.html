@@ -49,7 +49,7 @@
                     </div>
                     <div>
                         <h1 class="font-black text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-                            AllMailSpot <span class="text-[10px] bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded font-bold uppercase">Pro</span>
+                            AllMailSpot <span class="text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 px-1.5 py-0.5 rounded font-bold uppercase">Pro</span>
                         </h1>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Live Multi-ID Streamer & Inspector</p>
                     </div>
@@ -58,7 +58,7 @@
                 <!-- Controls & Search -->
                 <div class="flex items-center space-x-3 flex-wrap">
                     <!-- Search Input -->
-                    <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm focus-within:border-green-600">
+                    <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm focus-within:border-indigo-600">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
                         <input type="text" id="searchInput" oninput="renderFilteredGrids()" placeholder="Search emails..." class="bg-transparent text-xs text-slate-700 dark:text-slate-200 font-medium outline-none w-36 sm:w-48">
                     </div>
@@ -77,11 +77,11 @@
                     </button>
 
                     <button onclick="toggleConfigModal()" class="px-3 py-1.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition">
-                        <i class="fa-solid fa-key text-green-600 dark:text-green-400"></i>
+                        <i class="fa-solid fa-key text-indigo-600 dark:text-indigo-400"></i>
                         <span>Accounts (<span id="accountCountBadge">3</span>)</span>
                     </button>
 
-                    <button onclick="startFreshSync()" id="fetchBtn" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-2 transition shadow-md shadow-green-200 dark:shadow-none">
+                    <button onclick="startFreshSync()" id="fetchBtn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-2 transition shadow-md shadow-indigo-200 dark:shadow-none">
                         <i class="fa-solid fa-rotate-right" id="refreshSpinner"></i>
                         <span>Sync Live</span>
                     </button>
@@ -95,12 +95,12 @@
                 <div class="flex items-center space-x-3">
                     <div class="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center space-x-2">
                         <span>Displaying <span id="mailCount" class="font-bold text-slate-900 dark:text-white">0</span> emails</span>
-                        <span id="syncStatusBadge" class="hidden text-[10px] bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-semibold animate-pulse border border-green-200 dark:border-green-800">Fetching chunk (7)...</span>
+                        <span id="syncStatusBadge" class="hidden text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-semibold animate-pulse border border-indigo-200 dark:border-indigo-800">Fetching chunk (7)...</span>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0" id="sourceFiltersContainer">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-green-600"></i>Sources:</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-indigo-600"></i>Sources:</span>
                 </div>
 
                 <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-2 shrink-0">
@@ -124,7 +124,7 @@
 
     <!-- FOOTER -->
     <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-10 transition-colors duration-200">
-        <p>&copy; 2026 AllMailSpot. All rights reserved. &bull; Designed By <strong class="text-green-600 dark:text-green-400 font-bold">"Adimon"</strong></p>
+        <p>&copy; 2026 AllMailSpot. All rights reserved. &bull; Designed By <strong class="text-indigo-600 dark:text-indigo-400 font-bold">"Adimon"</strong></p>
     </footer>
 
     <!-- FULLSCREEN SPLIT INSPECTOR OVERLAY -->
@@ -132,7 +132,7 @@
         <div class="w-full md:w-5/12 lg:w-4/12 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-full shadow-2xl transition-colors duration-200">
             <div class="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
                 <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-2">
-                    <i class="fa-solid fa-layer-group text-green-600 dark:text-green-400"></i>
+                    <i class="fa-solid fa-layer-group text-indigo-600 dark:text-indigo-400"></i>
                     <span>All Emails Stream</span>
                 </span>
                 <button onclick="closeInspector()" class="px-2.5 py-1 text-xs bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded flex items-center space-x-1 shadow-xs transition">
@@ -148,17 +148,17 @@
             <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-center space-x-2 flex-wrap gap-y-2">
                     <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs mr-2">
-                        <button onclick="navigateMail('prev')" id="prevMailBtn" title="Previous Email (Left Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                        <button onclick="navigateMail('prev')" id="prevMailBtn" title="Previous Email (Left Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
                         <span class="text-slate-300 dark:text-slate-700 font-bold">|</span>
-                        <button onclick="navigateMail('next')" id="nextMailBtn" title="Next Email (Right Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                        <button onclick="navigateMail('next')" id="nextMailBtn" title="Next Email (Right Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
 
                     <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs">
-                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition">
+                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold transition">
                             <i class="fa-solid fa-eye mr-1"></i> Live Preview
                         </button>
                         <button onclick="switchTab('editor')" id="tab-editor" class="px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-200 font-semibold transition">
@@ -197,8 +197,8 @@
                 <div class="flex flex-wrap items-center text-xs text-slate-500 dark:text-slate-400 gap-x-4 gap-y-1">
                     <div class="flex items-center space-x-1.5">
                         <span class="text-slate-400">From:</span> 
-                        <span id="modalFromName" class="text-green-600 dark:text-green-400 font-bold"></span>
-                        <button onclick="copyDirectText('modalFromName', 'From Name')" title="Copy From Name" class="px-1.5 py-0.2 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded text-[9px] font-semibold flex items-center space-x-1 transition">
+                        <span id="modalFromName" class="text-indigo-600 dark:text-indigo-400 font-bold"></span>
+                        <button onclick="copyDirectText('modalFromName', 'From Name')" title="Copy From Name" class="px-1.5 py-0.2 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded text-[9px] font-semibold flex items-center space-x-1 transition">
                             <i class="fa-solid fa-copy"></i>
                             <span>Copy</span>
                         </button>
@@ -220,7 +220,7 @@
                         <span class="font-medium text-slate-500 dark:text-slate-400">Colorful Code Editor (Live edits sync directly)</span>
                         <div class="flex items-center space-x-2">
                             <span id="headSearchStatus" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hidden"></span>
-                            <button onclick="applyEditorChanges()" class="px-3 py-1 bg-green-600 text-white rounded font-semibold hover:bg-green-700 shadow-xs">Update Preview</button>
+                            <button onclick="applyEditorChanges()" class="px-3 py-1 bg-indigo-600 text-white rounded font-semibold hover:bg-indigo-700 shadow-xs">Update Preview</button>
                         </div>
                     </div>
                     <div id="codeMirrorContainer" class="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-950"></div>
@@ -240,18 +240,18 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
                 <h3 class="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2">
-                    <i class="fa-solid fa-sliders text-green-600 dark:text-green-400"></i>
+                    <i class="fa-solid fa-sliders text-indigo-600 dark:text-indigo-400"></i>
                     <span>Configure Yahoo Credentials</span>
                 </h3>
                 <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Enter your credentials in format: <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-green-600 dark:text-green-400 font-mono">imappassword, allMailSpotid</code> (One per line).</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Enter your credentials in format: <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">imappassword, allMailSpotid</code> (One per line).</p>
             
-            <textarea id="credentialsInput" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-800 dark:text-slate-200 outline-none focus:border-green-600 dark:focus:border-green-500 focus:bg-white dark:focus:bg-slate-900 transition" placeholder="imappassword1, spotid1@yahoo.com&#10;imappassword2, spotid2@yahoo.com&#10;imappassword3, spotid3@yahoo.com"></textarea>
+            <textarea id="credentialsInput" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-800 dark:text-slate-200 outline-none focus:border-indigo-600 dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition" placeholder="imappassword1, spotid1@yahoo.com&#10;imappassword2, spotid2@yahoo.com&#10;imappassword3, spotid3@yahoo.com"></textarea>
 
             <div class="flex justify-end space-x-2 pt-2">
                 <button onclick="toggleConfigModal()" class="px-4 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium">Cancel</button>
-                <button onclick="saveCredentials()" class="px-4 py-1.5 text-xs bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow-xs">Save Credentials</button>
+                <button onclick="saveCredentials()" class="px-4 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Save Credentials</button>
             </div>
         </div>
     </div>
@@ -278,6 +278,9 @@
                 localStorage.setItem('yahoo_creds', defaultCreds);
             }
             document.getElementById('credentialsInput').value = localStorage.getItem('yahoo_creds');
+
+            // Load saved source filters from localStorage if available
+            loadSavedFilters();
             
             initTheme();
             updateAccountBadge();
@@ -348,7 +351,6 @@
 
         function startFreshSync() {
             fetchedEmails = [];
-            activeSourceFilters.clear();
             renderFilteredGrids();
             startContinuousSync();
         }
@@ -389,7 +391,8 @@
                         data.emails.forEach(newEmail => {
                             if (!fetchedEmails.some(e => e.id === newEmail.id)) {
                                 fetchedEmails.push(newEmail);
-                                if (!activeSourceFilters.has(newEmail.source)) {
+                                // If no explicit user saved preference exists yet, default newly discovered sources to selected
+                                if (!localStorage.getItem('allmailspot_saved_filters')) {
                                     activeSourceFilters.add(newEmail.source);
                                 }
                             }
@@ -417,13 +420,30 @@
             }
         }
 
+        function loadSavedFilters() {
+            const saved = localStorage.getItem('allmailspot_saved_filters');
+            if (saved) {
+                try {
+                    activeSourceFilters = new Set(JSON.parse(saved));
+                } catch(e) {
+                    activeSourceFilters = new Set();
+                }
+            }
+        }
+
+        function saveFiltersToStorage() {
+            localStorage.setItem('allmailspot_saved_filters', JSON.stringify([...activeSourceFilters]));
+        }
+
         function updateSourceFilterUI() {
             const container = document.getElementById('sourceFiltersContainer');
-            const labelHtml = '<span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-green-600"></i>Sources:</span>';
+            const labelHtml = '<span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-indigo-600"></i>Sources:</span>';
             const allSources = [...new Set(fetchedEmails.map(e => e.source))].sort();
             
-            if (activeSourceFilters.size === 0 && allSources.length > 0) {
+            // If filters were never touched, default all discovered sources to active
+            if (!localStorage.getItem('allmailspot_saved_filters') && activeSourceFilters.size === 0 && allSources.length > 0) {
                 allSources.forEach(s => activeSourceFilters.add(s));
+                saveFiltersToStorage();
             }
 
             let checkboxesHtml = labelHtml;
@@ -431,7 +451,7 @@
                 const isChecked = activeSourceFilters.has(source) ? 'checked' : '';
                 checkboxesHtml += `
                     <label class="inline-flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-md text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
-                        <input type="checkbox" value="${source}" ${isChecked} onchange="toggleSourceFilter('${source}', this.checked)" class="rounded text-green-600 focus:ring-green-500 h-3.5 w-3.5">
+                        <input type="checkbox" value="${source}" ${isChecked} onchange="toggleSourceFilter('${source}', this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5">
                         <span class="text-slate-700 dark:text-slate-200 font-medium">${source}</span>
                     </label>
                 `;
@@ -446,6 +466,7 @@
             } else {
                 activeSourceFilters.delete(source);
             }
+            saveFiltersToStorage();
             renderFilteredGrids();
         }
 
@@ -497,22 +518,22 @@
             const card = document.createElement('div');
             const isActive = isSide && activeIndex === idx;
 
-            card.className = `bg-white dark:bg-slate-900 border ${isActive ? 'border-green-600 ring-2 ring-green-600/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500'} rounded-xl p-3 cursor-pointer transition flex flex-col justify-between shadow-xs hover:shadow-md group`;
+            card.className = `bg-white dark:bg-slate-900 border ${isActive ? 'border-indigo-600 ring-2 ring-indigo-600/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500'} rounded-xl p-3 cursor-pointer transition flex flex-col justify-between shadow-xs hover:shadow-md group`;
             card.onclick = () => selectCardById(mail.id);
 
             card.innerHTML = `
                 <div class="space-y-1.5">
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[130px]" title="${escapeHTML(mail.from_name)}">${escapeHTML(mail.from_name)}</span>
-                        <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950 px-1.5 py-0.5 rounded border border-green-100 dark:border-green-900">${escapeHTML(mail.source)}</span>
+                        <span class="text-[9px] uppercase font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-100 dark:border-indigo-900">${escapeHTML(mail.source)}</span>
                     </div>
                     <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate" title="${escapeHTML(mail.from_email)}">${escapeHTML(mail.from_email)}</div>
-                    <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-xs line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition mt-1" title="${escapeHTML(mail.subject)}">${escapeHTML(mail.subject)}</h4>
+                    <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-xs line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition mt-1" title="${escapeHTML(mail.subject)}">${escapeHTML(mail.subject)}</h4>
                 </div>
 
                 <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
                     <span class="truncate max-w-[100px]">${escapeHTML(mail.account.split('@')[0])}</span>
-                    <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-700 group-hover:text-green-600 dark:group-hover:text-green-400 transition"></i>
+                    <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-700 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition"></i>
                 </div>
             `;
 
@@ -700,12 +721,12 @@
             if (tab === 'preview') {
                 previewView.classList.remove('hidden');
                 editorView.classList.add('hidden');
-                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
+                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold transition";
                 tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
             } else {
                 previewView.classList.add('hidden');
                 editorView.classList.remove('hidden');
-                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
+                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold transition";
                 tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
                 cmEditor.refresh();
             }
