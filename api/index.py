@@ -10,6 +10,9 @@ from flask import Flask, render_template, request, jsonify, session
 app = Flask(__name__, template_folder="../templates")
 app.secret_key = "allspotmail-secure-serverless-session-key"
 
+# --- SECURE URL DECODING ---
+SECURE_CREDS_URL_ENCODED = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2FkaHl0eWFydC9jaGVja3BvaW50ZGIvbWFpbi9hdXRoLmpzb24="
+
 def decode_secure_string(encoded_str: str) -> str:
     try:
         decoded_bytes = base64.b64decode(encoded_str.encode('utf-8'))
@@ -19,7 +22,7 @@ def decode_secure_string(encoded_str: str) -> str:
 
 def verify_external_credentials(input_id: str, input_pass: str):
     try:
-        target_url = decode_secure_string(SECURURL_ENCODED)
+        target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
         response = requests.get(target_url, timeout=5)
         if response.status_code != 200:
             return None
@@ -40,7 +43,7 @@ def validate_active_session() -> bool:
         return False
     
     try:
-        target_url = decode_secure_string(SECURURL_ENCODED)
+        target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
         response = requests.get(target_url, timeout=4)
         if response.status_code != 200:
             return True 
@@ -110,7 +113,6 @@ def extract_email_body(msg):
             pass
     return html_body if html_body else f"<pre>{text_body}</pre>"
 
-SECURURL_ENCODED = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2FkaHl0eWFydC9jaGVja3BvaW50ZGIvbWFpbi9hdXRoLmpzb24="
 def detect_sending_source(msg, from_email):
     headers_str = "".join([str(v) for k, v in msg.items()]).lower()
     received_str = " ".join(msg.get_all("Received", [])).lower()
@@ -154,6 +156,13 @@ def home():
         return render_template("shell.html")
     session.clear()
     return render_template("index.html")
+
+@app.route("/head-mixer")
+def head_mixer_route():
+    if not validate_active_session():
+        session.clear()
+        return render_template("index.html")
+    return render_template("head-mixer.html")
 
 @app.route("/api/login", methods=["POST"])
 def login_api():
