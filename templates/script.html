@@ -200,14 +200,14 @@
             <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 space-y-1.5 text-xs max-h-[30vh] overflow-y-auto">
                 <!-- Row 1: From Name, From Email, Account Brief -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="font-bold text-slate-400 text-[9px] uppercase block">From Name</span>
                             <span id="modalFromName" class="font-bold text-green-600 dark:text-green-400 truncate block text-[11px]">--</span>
                         </div>
                         <button onclick="copyDirectText('modalFromName', 'From Name')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
                     </div>
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="font-bold text-slate-400 text-[9px] uppercase block">From Email</span>
                             <span id="modalFromEmail" class="font-mono text-slate-700 dark:text-slate-300 truncate block text-[11px]">--</span>
@@ -224,7 +224,7 @@
                 </div>
 
                 <!-- Row 2: Subject -->
-                <div class="flex items-center justify-between gap-2 bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                <div class="flex items-center justify-start gap-2 bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                     <div class="flex items-center space-x-2 overflow-hidden">
                         <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 shrink-0">Subject</span>
                         <h2 id="modalSubject" class="font-bold text-slate-900 dark:text-white text-xs truncate">Select an Email</h2>
@@ -234,14 +234,14 @@
 
                 <!-- Row 3: Return-Path (Original vs Decoded Template) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="text-[9px] uppercase font-bold text-slate-400">Original Return-Path</span>
                             <span id="modalReturnPath" class="font-mono text-slate-700 dark:text-slate-300 truncate block">--</span>
                         </div>
                         <button onclick="copyDirectText('modalReturnPath', 'Return-Path')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
                     </div>
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="text-[9px] uppercase font-bold text-purple-600 dark:text-purple-400">Dynamic Return-Path Template</span>
                             <span id="modalDecodedReturnPath" class="font-mono text-purple-700 dark:text-purple-300 truncate block">--</span>
@@ -252,14 +252,14 @@
 
                 <!-- Row 4: Message-ID (Original vs Decoded Template) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="text-[9px] uppercase font-bold text-slate-400">Original Message-ID</span>
                             <span id="modalMessageId" class="font-mono text-slate-700 dark:text-slate-300 truncate block">--</span>
                         </div>
                         <button onclick="copyDirectText('modalMessageId', 'Message-ID')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
                     </div>
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center justify-start bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="truncate pr-1">
                             <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400">Dynamic Message-ID Template</span>
                             <span id="modalDecodedMessageId" class="font-mono text-green-700 dark:text-green-300 truncate block">--</span>
