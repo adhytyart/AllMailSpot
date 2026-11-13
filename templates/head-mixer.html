@@ -1,0 +1,2654 @@
+{% raw %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Envelope: email head generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #151922;
+  --bg-2: #1a1f2b;
+  --surface: #1f2533;
+  --surface-2: #272e3f;
+  --line: #333c52;
+  --line-soft: #283044;
+  --text: #e7e9ef;
+  --muted: #929bb0;
+  --faint: #6b7489;
+  --blue: #7fa6f5;
+  --red: #ee7262;
+  --paper: #f3eee2;
+  --ok: #74c99a;
+  --warn: #e9bf5c;
+  --err: #f07a7a;
+  --code-bg: #121620;
+  --t-tag: #7fa6f5;
+  --t-attr: #c3a7f5;
+  --t-str: #a9d28d;
+  --t-com: #69728a;
+  --t-cc: #f0a868;
+  --t-sel: #e6c17d;
+  --t-prop: #7fd1c6;
+  --t-val: #dfe3ec;
+  --t-at: #ee7262;
+  --sans: 'Instrument Sans', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --r-s: 6px;
+  --r-m: 10px;
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #151922; --surface: #1f2533; --text: #e7e9ef; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #151922; --surface: #1f2533; --text: #e7e9ef; color-scheme: dark; }
+:root[data-ui="light"] {
+  --bg: #eef0f4; --bg-2: #e6e9ef; --surface: #ffffff; --surface-2: #f2f4f8; --line: #cfd5e0; --line-soft: #e1e5ec;
+  --text: #1c2230; --muted: #5a6478; --faint: #8a93a6; --blue: #2f62c9; --red: #c94a3a; --ok: #23824f; --warn: #9a6b00; --err: #c43c3c;
+  --code-bg: #f7f8fb; --t-tag: #2f62c9; --t-attr: #7a46c4; --t-str: #2f7d2a; --t-com: #8a93a6; --t-cc: #b35c00; --t-sel: #8a5a00; --t-prop: #0f7c73; --t-val: #1c2230; --t-at: #c94a3a;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100%; }
+.side { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; height: calc(100dvh - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 4px; padding: 22px 14px 18px; border-right: 1px solid var(--line-soft); background: var(--bg-2); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 22px; }
+.brand-mark { width: 30px; height: 22px; border-radius: 3px; background: var(--paper); position: relative; overflow: hidden; flex: none; }
+.brand-mark::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, var(--red) 0 5px, var(--paper) 5px 9px, var(--blue) 9px 14px, var(--paper) 14px 18px); }
+.brand-mark::after { content: ""; position: absolute; inset: 4px; background: var(--paper); border-radius: 1px; }
+.brand b { display: block; font-size: 16px; letter-spacing: -0.01em; }
+.brand small { display: block; color: var(--muted); font-size: 12px; }
+.nav a { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: var(--r-s); color: var(--muted); text-decoration: none; font-weight: 500; }
+.nav a:hover { color: var(--text); background: var(--surface); }
+.nav a[aria-current="page"] { color: var(--text); background: var(--surface-2); box-shadow: inset 2px 0 0 var(--blue); }
+.nav svg { width: 18px; height: 18px; flex: none; }
+.nav .count { margin-left: auto; font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.side-foot { margin-top: auto; padding: 12px 10px 0; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--faint); }
+.side-foot .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+.side-foot .dot.local { background: var(--warn); }
+.side-foot .dot.memory { background: var(--err); }
+
+main { min-width: 0; padding: 30px clamp(16px, 3.4vw, 44px) 60px; }
+.view { max-width: 1320px; margin: 0 auto; }
+.view-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 24px; }
+.view-head h1 { margin: 0; font-size: 26px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; }
+.view-head p { margin: 6px 0 0; color: var(--muted); max-width: 64ch; }
+
+/* ---------- controls ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: var(--r-s); border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 500; font-size: 14px; white-space: nowrap; text-decoration: none; color: var(--text); }
+.btn:hover:not(:disabled) { border-color: var(--faint); background: var(--surface-2); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #0f1522; font-weight: 600; }
+.btn.primary:hover:not(:disabled) { background: #93b5f8; border-color: #93b5f8; }
+:root[data-ui="light"] .btn.primary { color: #fff; }
+:root[data-ui="light"] .btn.primary:hover:not(:disabled) { background: #2754ad; }
+.btn.danger { color: var(--err); }
+.btn.danger.solid { background: var(--err); border-color: var(--err); color: #1a0d0d; font-weight: 600; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover:not(:disabled) { color: var(--text); background: var(--surface); border-color: transparent; }
+.btn.icon { padding: 0; width: 34px; min-height: 34px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.input, .select { min-height: 36px; padding: 0 12px; border-radius: var(--r-s); border: 1px solid var(--line); background: var(--code-bg); }
+.input::placeholder { color: var(--faint); }
+.select { padding-right: 8px; }
+.field { display: grid; gap: 6px; }
+.field label, .lbl { font-size: 13px; color: var(--muted); font-weight: 500; }
+.hint { font-size: 13px; color: var(--faint); }
+.panel { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); }
+.panel-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); }
+.panel-h h2, .panel-h h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.panel-b { padding: 16px 18px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.pill.err { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.pill.blue { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 40%, transparent); }
+.mono { font-family: var(--mono); font-size: 0.92em; }
+.muted { color: var(--muted); }
+.empty { padding: 44px 24px; text-align: center; color: var(--muted); }
+.empty h3 { margin: 0 0 6px; color: var(--text); font-size: 17px; font-weight: 600; }
+.empty p { margin: 0 auto 18px; max-width: 52ch; }
+
+/* ---------- dashboard ---------- */
+.meter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line-soft); border-radius: var(--r-m); background: var(--surface); overflow: hidden; margin-bottom: 22px; }
+.meter > div { padding: 18px 20px; border-left: 1px solid var(--line-soft); }
+.meter > div:first-child { border-left: 0; }
+.meter dt { font-size: 13px; color: var(--muted); }
+.meter dd { margin: 6px 0 0; font: 500 28px/1.1 var(--mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.meter dd small { font-size: 14px; color: var(--faint); letter-spacing: 0; }
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.dash-quick { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; padding: 22px; margin-bottom: 22px; }
+.dash-quick p { margin: 0; color: var(--muted); max-width: 60ch; }
+.dash-quick h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li + li { border-top: 1px solid var(--line-soft); }
+.mini { display: flex; align-items: center; gap: 12px; padding: 11px 18px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; }
+.mini:hover { background: var(--surface-2); }
+.mini .nm { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.mini .tm { color: var(--faint); font-size: 13px; white-space: nowrap; }
+.coverage { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px 14px; }
+.cov { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); }
+.cov i { width: 9px; height: 9px; border-radius: 2px; background: var(--line); flex: none; }
+.cov.on { color: var(--text); }
+.cov.on i { background: var(--ok); }
+
+/* ---------- airmail generate button ---------- */
+.airmail { position: relative; display: inline-flex; padding: 6px; border-radius: 12px; border: 0; cursor: pointer; background: repeating-linear-gradient(-45deg, var(--red) 0 12px, var(--paper) 12px 20px, var(--blue) 20px 32px, var(--paper) 32px 40px); background-size: 56.57px 56.57px; }
+.airmail span { display: flex; align-items: center; gap: 12px; padding: 16px 30px; border-radius: 7px; background: var(--bg); color: var(--text); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+.airmail svg { width: 22px; height: 22px; }
+.airmail:hover span { background: var(--surface); }
+.airmail:disabled { cursor: progress; }
+.airmail.busy { animation: post 0.9s linear infinite; }
+.airmail.small span { padding: 11px 20px; font-size: 15px; }
+@keyframes post { to { background-position: 56.57px 0; } }
+@media (prefers-reduced-motion: reduce) { .airmail.busy { animation: none; opacity: 0.7; } }
+
+/* ---------- library ---------- */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.toolbar .search { flex: 1 1 260px; position: relative; }
+.toolbar .search input { width: 100%; padding-left: 36px; }
+.toolbar .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--faint); }
+.result-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); margin: 0 2px 10px; }
+.rows { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line-soft); border-radius: var(--r-m); background: var(--surface); overflow: hidden; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center; padding: 10px 12px 10px 18px; }
+.row + .row { border-top: 1px solid var(--line-soft); }
+.row:hover { background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.row-main { display: grid; gap: 2px; min-width: 0; text-align: left; background: none; border: 0; padding: 4px 0; cursor: pointer; }
+.row-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-main:hover .row-name { color: var(--blue); }
+.row-sub { display: flex; gap: 14px; font-size: 12.5px; color: var(--faint); flex-wrap: wrap; }
+.ticks { display: grid; grid-template-columns: repeat(13, 7px); gap: 3px; }
+.ticks i { height: 16px; border-radius: 2px; background: var(--line); }
+.ticks i.on { background: color-mix(in srgb, var(--ok) 75%, var(--surface)); }
+.row-actions { display: flex; gap: 2px; }
+.pager { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); }
+
+/* ---------- editor ---------- */
+.ed { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--r-m); overflow: hidden; font: 13px/1.62 var(--mono); min-height: 0; }
+.ed:focus-within { border-color: color-mix(in srgb, var(--blue) 60%, var(--line)); }
+.ed-gutter { position: relative; overflow: hidden; padding: 14px 10px 14px 14px; color: var(--faint); text-align: right; user-select: none; border-right: 1px solid var(--line-soft); min-width: 46px; }
+.ed-gutter pre { margin: 0; font: inherit; }
+.ed-gutter .bad { color: var(--err); font-weight: 600; }
+.ed-body { position: relative; min-height: 0; }
+.ed-body pre, .ed-body textarea { position: absolute; inset: 0; margin: 0; padding: 14px 16px; font: inherit; white-space: pre; tab-size: 2; -moz-tab-size: 2; border: 0; letter-spacing: 0; word-spacing: 0; }
+.ed-body pre { overflow: hidden; pointer-events: none; color: var(--t-val); }
+.ed-body textarea { overflow: auto; resize: none; outline: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--text); }
+.ed-body textarea::selection { background: color-mix(in srgb, var(--blue) 35%, transparent); -webkit-text-fill-color: transparent; }
+.ed-body textarea::placeholder { -webkit-text-fill-color: var(--faint); color: var(--faint); }
+.t-tag { color: var(--t-tag); } .t-attr { color: var(--t-attr); } .t-str { color: var(--t-str); }
+.t-com { color: var(--t-com); font-style: italic; } .t-cc { color: var(--t-cc); font-weight: 500; }
+.t-sel { color: var(--t-sel); } .t-prop { color: var(--t-prop); } .t-val { color: var(--t-val); } .t-at { color: var(--t-at); } .t-imp { color: var(--red); } .t-p { color: var(--faint); }
+
+/* ---------- sheet (editor overlay) ---------- */
+.sheet { position: fixed; inset: 0; z-index: 40; display: flex; justify-content: flex-end; background: rgba(8, 10, 16, 0.55); }
+.sheet-card { width: min(1080px, 100%); height: 100%; display: flex; flex-direction: column; background: var(--bg); border-left: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sheet-top { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line-soft); }
+.sheet-top input { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; background: transparent; border: 1px solid transparent; border-radius: var(--r-s); padding: 6px 10px; }
+.sheet-top input:hover, .sheet-top input:focus { border-color: var(--line); background: var(--code-bg); outline: none; }
+.sheet-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 30px; font-size: 12.5px; color: var(--faint); border-bottom: 1px solid var(--line-soft); }
+.sheet-meta b { color: var(--muted); font-weight: 500; }
+.sheet-body { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 12px; padding: 16px 20px; }
+.sheet-body .ed { height: 100%; }
+.problems { max-height: 160px; overflow: auto; border: 1px solid var(--line-soft); border-radius: var(--r-m); background: var(--surface); }
+.problems:empty { display: none; }
+.prob { display: flex; gap: 10px; width: 100%; text-align: left; padding: 7px 12px; font-size: 13px; background: none; border: 0; cursor: pointer; }
+.prob + .prob { border-top: 1px solid var(--line-soft); }
+.prob:hover { background: var(--surface-2); }
+.prob .ln { font-family: var(--mono); color: var(--faint); min-width: 54px; }
+.prob.e .k { color: var(--err); } .prob.w .k { color: var(--warn); }
+.sheet-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--line-soft); }
+.sheet-foot .grow { flex: 1; }
+
+/* ---------- generator ---------- */
+.gen-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-bottom: 20px; }
+.gen-hero .facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; color: var(--muted); }
+.gen-hero .facts b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.gen-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.out-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); }
+.out-id { font: 500 14px var(--mono); }
+.out-id small { display: block; font-family: var(--sans); font-size: 12px; color: var(--faint); font-weight: 400; margin-top: 2px; }
+.out-ed { padding: 12px; }
+.out-ed .ed { height: min(68vh, 760px); min-height: 360px; }
+.notice { padding: 22px; border-radius: var(--r-m); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 7%, var(--surface)); }
+.notice h3 { margin: 0 0 6px; font-size: 16px; }
+.notice p { margin: 0 0 14px; color: var(--muted); max-width: 70ch; }
+.checks { list-style: none; margin: 0; padding: 4px 0; }
+.checks li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 18px; font-size: 13.5px; }
+.checks svg { width: 16px; height: 16px; }
+.checks .yes { color: var(--ok); } .checks .no { color: var(--err); }
+.checks .src { font-size: 12px; color: var(--faint); }
+.checks .src.bi { color: var(--warn); }
+.comps { list-style: none; margin: 0; padding: 4px 0; max-height: 420px; overflow: auto; }
+.comps li { display: grid; gap: 1px; padding: 7px 18px; font-size: 13px; }
+.comps li + li { border-top: 1px solid var(--line-soft); }
+.comps .from { color: var(--faint); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-stack { display: grid; gap: 16px; }
+details.adv summary { cursor: pointer; color: var(--muted); font-size: 13.5px; padding: 12px 18px; }
+details.adv .panel-b { padding-top: 0; }
+.seed-row { display: flex; gap: 8px; }
+.seed-row input { flex: 1; min-width: 0; }
+
+/* ---------- history ---------- */
+.hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.hist-item { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); overflow: hidden; }
+.hist-sum { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 13px 18px; text-align: left; background: none; border: 0; cursor: pointer; }
+.hist-sum:hover { background: var(--surface-2); }
+.hist-sum .id { font: 500 14px var(--mono); }
+.hist-sum .sub { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--faint); margin-top: 3px; }
+.hist-sum .chev { width: 18px; height: 18px; color: var(--faint); transition: transform 0.15s; }
+.hist-item.open .chev { transform: rotate(90deg); }
+.hist-body { border-top: 1px solid var(--line-soft); padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; }
+.hist-body .ed { height: 380px; }
+.kv { display: grid; gap: 12px; font-size: 13.5px; align-content: start; }
+.kv h4 { margin: 0 0 4px; font-size: 13px; color: var(--muted); font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- settings ---------- */
+.set-grid { display: grid; gap: 18px; max-width: 860px; }
+.set-row { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: center; padding: 14px 18px; }
+.set-row + .set-row { border-top: 1px solid var(--line-soft); }
+.set-row h3 { margin: 0; font-size: 14.5px; font-weight: 600; }
+.set-row p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
+.set-row .ctl { justify-self: end; display: flex; gap: 8px; align-items: center; }
+.switch { position: relative; width: 40px; height: 22px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--line); transition: background 0.15s; pointer-events: none; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--text); transition: transform 0.15s; }
+.switch input:checked + span { background: var(--blue); }
+.switch input:checked + span::after { transform: translateX(18px); background: #0f1522; }
+.switch input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ---------- dialog & toasts ---------- */
+dialog { border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface); color: var(--text); padding: 0; width: min(460px, calc(100% - 32px)); }
+dialog::backdrop { background: rgba(8, 10, 16, 0.6); }
+dialog .dl-b { padding: 20px 22px 6px; }
+dialog h2 { margin: 0 0 8px; font-size: 17px; }
+dialog p { margin: 0; color: var(--muted); }
+dialog .dl-list { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; max-height: 180px; overflow: auto; }
+dialog .btns { justify-content: flex-end; padding: 16px 22px 20px; }
+.toasts { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60; display: grid; gap: 8px; max-width: min(380px, calc(100% - 36px)); }
+.toast { padding: 11px 14px; border-radius: var(--r-s); background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); font-size: 14px; }
+.toast.err { border-color: color-mix(in srgb, var(--err) 55%, var(--line)); }
+.toast.ok { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.loading { display: grid; place-items: center; min-height: 60vh; color: var(--muted); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1180px) {
+  .gen-grid { grid-template-columns: minmax(0, 1fr); }
+  .side-stack { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+  .hist-body { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 980px) {
+  .dash-grid { grid-template-columns: minmax(0, 1fr); }
+  .meter { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .meter > div:nth-child(3) { border-left: 0; }
+  .meter > div:nth-child(n+3) { border-top: 1px solid var(--line-soft); }
+  .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .row .ticks { display: none; }
+}
+@media (max-width: 820px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: auto; z-index: 30; flex-direction: row; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-right: 0; border-top: 1px solid var(--line); }
+  .brand, .side-foot { display: none; }
+  .nav { display: flex; width: 100%; justify-content: space-around; }
+  .nav a { flex-direction: column; gap: 3px; padding: 6px 4px; font-size: 11px; flex: 1; text-align: center; }
+  .nav a[aria-current="page"] { box-shadow: inset 0 2px 0 var(--blue); }
+  .nav .count { display: none; }
+  main { padding: 20px 14px calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .view-head h1 { font-size: 22px; }
+  .dash-quick { grid-template-columns: minmax(0, 1fr); }
+  .set-row { grid-template-columns: minmax(0, 1fr); }
+  .set-row .ctl { justify-self: start; }
+  .sheet-card { border-left: 0; }
+  .sheet-meta { padding: 8px 20px; }
+  .out-ed .ed { height: 60vh; }
+  .toasts { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 520px) {
+  .meter dd { font-size: 22px; }
+  .row { padding-left: 14px; gap: 8px; }
+  .airmail span { padding: 14px 22px; font-size: 16px; }
+  .hist-body .ed { height: 300px; }
+}
+
+/* ---------- simplified UI ---------- */
+main:focus { outline: none; }
+.nav .short { display: none; }
+.btn.big { min-height: 42px; padding: 0 18px; font-size: 15px; }
+.add-card { padding: 16px; margin-bottom: 30px; }
+.add-ed .ed { height: 340px; }
+.add-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.add-row .input { flex: 1 1 240px; min-height: 42px; font-size: 15px; }
+.add-msg { margin: 12px 0 0; padding: 10px 14px; border-radius: var(--r-s); font-size: 14px; border: 1px solid var(--line); }
+.add-msg.ok { border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 8%, transparent); }
+.add-msg.err { border-color: color-mix(in srgb, var(--err) 45%, transparent); background: color-mix(in srgb, var(--err) 8%, transparent); }
+.mine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.mine-head h2 { margin: 0; font-size: 19px; font-weight: 600; }
+.mine-head .search, .toolbar .search { position: relative; flex: 0 1 320px; }
+.mine-head .search input, .toolbar .search input { width: 100%; padding-left: 36px; }
+.mine-head .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--faint); }
+.row.simple { grid-template-columns: minmax(0, 1fr) auto; }
+.heart.on, .heart-btn.on { color: var(--red); }
+.heart-btn.on { border-color: color-mix(in srgb, var(--red) 50%, var(--line)); }
+.tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--line-soft); }
+.tab { border: 0; background: none; padding: 7px 14px; border-radius: var(--r-s); cursor: pointer; color: var(--muted); font-weight: 500; }
+.tab span { color: var(--faint); font-size: 12.5px; margin-left: 4px; }
+.tab[aria-selected="true"] { background: var(--surface-2); color: var(--text); }
+.toolbar { justify-content: space-between; }
+.fav-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding-right: 10px; }
+.fav-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-sum .sub { align-items: center; }
+.fav-body { border-top: 1px solid var(--line-soft); padding: 14px; }
+.fav-body .ed { height: 420px; }
+.result .out-bar { padding: 14px 16px; }
+details.inside { border-top: 1px solid var(--line-soft); }
+details.inside summary { cursor: pointer; padding: 14px 18px; color: var(--muted); font-weight: 500; }
+.inside-b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 0 18px 18px; }
+.inside-b h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 500; }
+.inside-b .checks { columns: 2; padding: 0; }
+.inside-b .checks li { padding: 4px 0; grid-template-columns: 18px minmax(0, 1fr); break-inside: avoid; }
+.inside-b .hint { margin: 12px 0 0; }
+.result .out-ed .ed { height: min(62vh, 680px); }
+@media (max-width: 820px) {
+  .nav .full { display: none; } .nav .short { display: inline; }
+  .inside-b { grid-template-columns: minmax(0, 1fr); }
+  .add-ed .ed { height: 260px; }
+  .toolbar .search, .mine-head .search { flex: 1 1 100%; }
+}
+@media (max-width: 520px) { .inside-b .checks { columns: 1; } .result .btns .btn { flex: 1; } }
+.fav-row:hover { background: var(--surface-2); } .fav-row .hist-sum:hover { background: none; }
+
+.mix { display: grid; gap: 6px; }
+.mix-opts { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--line-soft); flex-wrap: wrap; }
+.mix-opts button { display: grid; gap: 1px; text-align: left; border: 1px solid transparent; background: none; border-radius: var(--r-s); padding: 8px 14px; cursor: pointer; color: var(--muted); max-width: 230px; }
+.mix-opts button b { font-weight: 600; font-size: 14.5px; }
+.mix-opts button small { font-size: 12px; color: var(--faint); line-height: 1.35; }
+.mix-opts button[aria-checked="true"] { background: var(--surface-2); color: var(--text); border-color: color-mix(in srgb, var(--blue) 55%, var(--line)); }
+.mix-opts button[aria-checked="true"] small { color: var(--muted); }
+@media (max-width: 520px) { .mix, .mix-opts { width: 100%; } .mix-opts button { flex: 1; } }
+
+.picker { margin-bottom: 20px; }
+.pick-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px 16px; }
+.pick-top .lbl { width: 100%; }
+.pick-body { border-top: 1px solid var(--line-soft); padding: 14px 16px 16px; }
+.pick-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.pick-tools .search { position: relative; flex: 1 1 240px; }
+.pick-tools .search input { width: 100%; padding-left: 36px; }
+.pick-tools .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--faint); }
+.pick-list { max-height: 340px; overflow: auto; border: 1px solid var(--line-soft); border-radius: var(--r-m); background: var(--code-bg); }
+.pick-group h4 { position: sticky; top: 0; margin: 0; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--muted); background: var(--surface); border-bottom: 1px solid var(--line-soft); z-index: 1; }
+.pick-group h4 span { color: var(--faint); font-weight: 500; margin-left: 4px; }
+.pick-group .hint { padding: 8px 14px; margin: 0; }
+.pick-row { display: flex; align-items: center; gap: 12px; padding: 9px 14px; cursor: pointer; border-bottom: 1px solid var(--line-soft); }
+.pick-row:hover { background: var(--surface); }
+.pick-row input { width: 18px; height: 18px; accent-color: var(--blue); flex: none; margin: 0; }
+.pick-row .pn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-row .pk svg { width: 15px; height: 15px; display: block; }
+.picker #pick-warn { margin: 0 0 10px; }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Main">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><div><b>Envelope</b><small>Email head generator</small></div></div>
+    <nav class="nav"><a href="#generate" data-view="generate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="full">Generate</span><span class="short">Generate</span></a><a href="#favorites" data-view="favorites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="full">Favorites</span><span class="short">Favorites</span><span class="count" id="c-fav">0</span></a><a href="#add" data-view="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg><span class="full">Add heads</span><span class="short">Add</span><span class="count" id="c-heads">0</span></a><a href="#preferences" data-view="preferences"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="full">Settings</span><span class="short">Settings</span></a></nav>
+    <div class="side-foot" id="store-foot">Connecting…</div>
+  </aside>
+  <main id="main" tabindex="-1">
+    <div class="loading" id="boot">Loading…</div>
+    <section class="view" id="v-generate" hidden></section>
+    <section class="view" id="v-favorites" hidden></section>
+    <section class="view" id="v-add" hidden></section>
+    <section class="view" id="v-preferences" hidden></section>
+  </main>
+</div>
+<div class="sheet" id="sheet" hidden></div>
+<dialog id="dlg"></dialog>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<script>
+/* HeadForge engine — pure functions, no DOM. */
+const Engine = (() => {
+  'use strict';
+
+  /* ---------------- utilities ---------------- */
+  function hash(str) {
+    let h1 = 0x811c9dc5, h2 = 0x9e3779b9;
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      h1 ^= c; h1 = Math.imul(h1, 16777619);
+      h2 = Math.imul(h2 ^ c, 2246822507); h2 ^= h2 >>> 13;
+    }
+    return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+  }
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const norm = s => String(s || '').replace(/\s+/g, ' ').trim();
+  const lc = s => String(s || '').toLowerCase();
+
+  function lineIndex(src) {
+    const starts = [0];
+    for (let i = 0; i < src.length; i++) if (src.charCodeAt(i) === 10) starts.push(i + 1);
+    return idx => { let lo = 0, hi = starts.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (starts[m] <= idx) lo = m; else hi = m - 1; } return lo + 1; };
+  }
+
+  /* ---------------- HTML parser ---------------- */
+  const VOID = new Set(['meta', 'link', 'base', 'br', 'img', 'hr', 'input', 'col', 'area', 'param', 'source', 'embed', 'wbr', 'track']);
+  const RAW = new Set(['style', 'script', 'title', 'textarea']);
+
+  function parseAttrs(str) {
+    const attrs = [];
+    const re = /([^\s=\/>"']+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+    let m;
+    while ((m = re.exec(str))) {
+      const v = m[2] !== undefined ? m[2] : m[3] !== undefined ? m[3] : m[4];
+      attrs.push([m[1], v === undefined ? null : v]);
+    }
+    return attrs;
+  }
+  function findTagEnd(src, i) {
+    let q = null;
+    for (; i < src.length; i++) {
+      const c = src[i];
+      if (q) { if (c === q) q = null; }
+      else if (c === '"' || c === "'") q = c;
+      else if (c === '>') return i;
+    }
+    return -1;
+  }
+
+  function parseHTML(src, offset = 0, lineOf = null) {
+    lineOf = lineOf || lineIndex(src);
+    const errors = [];
+    const err = (msg, at) => errors.push({ line: lineOf(at + offset), msg });
+    const root = { type: 'root', children: [] };
+    const stack = [root];
+    const cur = () => stack[stack.length - 1];
+    let i = 0;
+    const n = src.length;
+    while (i < n) {
+      if (src.startsWith('<!--', i)) {
+        const head = src.slice(i, i + 300);
+        const m = /^<!--\[if\s+([^\]]+)\]>/i.exec(head);
+        if (m) {
+          const after = i + m[0].length;
+          if (src.startsWith('<!-->', after)) {
+            const node = { type: 'cc', cond: norm(m[1]), revealed: true, children: [], at: i + offset };
+            cur().children.push(node); stack.push(node); i = after + 5; continue;
+          }
+          const end = src.indexOf('-->', after);
+          if (end < 0) { err('Conditional comment <!--[if ' + norm(m[1]) + ']> is never closed with <![endif]-->', i); break; }
+          const endif = src.lastIndexOf('<![endif]', end);
+          if (endif < after || src.slice(endif, end + 3).replace(/\s/g, '').toLowerCase() !== '<![endif]-->') {
+            err('Conditional comment <!--[if ' + norm(m[1]) + ']> ends at "-->" before its <![endif]', i);
+            cur().children.push({ type: 'comment', text: src.slice(i + 4, end) }); i = end + 3; continue;
+          }
+          const inner = src.slice(after, endif);
+          const sub = parseHTML(inner, offset + after, lineOf);
+          sub.errors.forEach(e => errors.push(e));
+          cur().children.push({ type: 'cc', cond: norm(m[1]), revealed: false, children: sub.root.children, at: i + offset });
+          i = end + 3; continue;
+        }
+        const close = /^<!--\s*<!\[endif\]\s*-->/i.exec(head);
+        if (close) {
+          let k = stack.length - 1;
+          while (k > 0 && !(stack[k].type === 'cc' && stack[k].revealed)) k--;
+          if (k <= 0) err('Found <!--<![endif]--> without a matching <!--[if ...]><!-->', i);
+          else {
+            for (let j = stack.length - 1; j > k; j--) err('<' + stack[j].rawName + '> is not closed before <!--<![endif]-->', stack[j].at - offset);
+            stack.length = k;
+          }
+          i += close[0].length; continue;
+        }
+        const end = src.indexOf('-->', i + 4);
+        if (end < 0) { err('Comment "<!--" is never closed with "-->"', i); break; }
+        cur().children.push({ type: 'comment', text: src.slice(i + 4, end) });
+        i = end + 3; continue;
+      }
+      if (/^<!\[endif\]/i.test(src.slice(i, i + 10))) {
+        err('Found <![endif]--> without a matching <!--[if ...]>', i);
+        const e = src.indexOf('>', i); i = e < 0 ? n : e + 1; continue;
+      }
+      if (src.startsWith('<!', i) || src.startsWith('<?', i)) {
+        const e = src.indexOf('>', i);
+        const raw = src.slice(i, e < 0 ? n : e + 1);
+        cur().children.push({ type: 'doctype', raw, at: i + offset });
+        i = e < 0 ? n : e + 1; continue;
+      }
+      if (src[i] === '<' && src[i + 1] === '/') {
+        const m = /^<\/\s*([a-zA-Z][\w:.\-]*)\s*>/.exec(src.slice(i, i + 200));
+        if (!m) { err('Malformed closing tag', i); i++; continue; }
+        const name = lc(m[1]);
+        let k = stack.length - 1;
+        while (k > 0 && !(stack[k].type === 'element' && stack[k].name === name)) {
+          if (stack[k].type === 'cc') { k = 0; break; }
+          k--;
+        }
+        if (k <= 0) err('Closing tag </' + m[1] + '> has no matching opening tag', i);
+        else {
+          for (let j = stack.length - 1; j > k; j--) err('<' + stack[j].rawName + '> is not closed', stack[j].at - offset);
+          stack.length = k;
+        }
+        i += m[0].length; continue;
+      }
+      if (src[i] === '<' && /[a-zA-Z]/.test(src[i + 1] || '')) {
+        const e = findTagEnd(src, i);
+        if (e < 0) { err('Tag is missing its closing ">"', i); break; }
+        let inner = src.slice(i + 1, e);
+        let selfClose = false;
+        if (/\/\s*$/.test(inner)) { selfClose = true; inner = inner.replace(/\/\s*$/, ''); }
+        const nm = /^([a-zA-Z][\w:.\-]*)/.exec(inner);
+        const rawName = nm[1];
+        const name = lc(rawName);
+        const node = { type: 'element', name, rawName, attrs: parseAttrs(inner.slice(rawName.length)), selfClose, children: [], at: i + offset };
+        cur().children.push(node);
+        i = e + 1;
+        if (RAW.has(name) && !selfClose) {
+          const re = new RegExp('</\\s*' + name + '\\s*>', 'i');
+          const rest = src.slice(i);
+          const cm = re.exec(rest);
+          if (!cm) { err('<' + rawName + '> is never closed', node.at - offset); node.content = rest; node.contentAt = i + offset; i = n; continue; }
+          node.content = rest.slice(0, cm.index);
+          node.contentAt = i + offset;
+          i += cm.index + cm[0].length; continue;
+        }
+        if (!VOID.has(name) && !selfClose) stack.push(node);
+        continue;
+      }
+      let e = src.indexOf('<', i + 1);
+      if (e < 0) e = n;
+      const text = src.slice(i, e);
+      if (text.trim()) cur().children.push({ type: 'text', text, at: i + offset });
+      i = e;
+    }
+    for (let j = stack.length - 1; j > 0; j--) {
+      const s = stack[j];
+      if (s.type === 'cc') err('<!--[if ' + s.cond + ']><!--> is never closed with <!--<![endif]-->', s.at - offset);
+      else err('<' + s.rawName + '> is never closed', s.at - offset);
+    }
+    return { root, errors };
+  }
+
+  const getAttr = (node, k) => { const a = node.attrs && node.attrs.find(x => lc(x[0]) === k); return a ? (a[1] == null ? '' : a[1]) : null; };
+
+  /* ---------------- CSS parser ---------------- */
+  function parseCSS(text, baseLine = 1) {
+    const errors = [];
+    let i = 0;
+    const n = text.length;
+    let line = baseLine;
+    const lineAt = idx => { let l = baseLine; for (let k = 0; k < idx && k < n; k++) if (text.charCodeAt(k) === 10) l++; return l; };
+    function skipWs() {
+      while (i < n) {
+        if (/\s/.test(text[i])) { i++; continue; }
+        if (text.startsWith('/*', i)) {
+          const e = text.indexOf('*/', i + 2);
+          if (e < 0) { errors.push({ line: lineAt(i), msg: 'CSS comment "/*" is never closed' }); i = n; return; }
+          i = e + 2; continue;
+        }
+        if (text.startsWith('<!--', i)) { i += 4; continue; }
+        if (text.startsWith('-->', i)) { i += 3; continue; }
+        break;
+      }
+    }
+    function readUntil(stops) {
+      let s = i, q = null, depth = 0;
+      while (i < n) {
+        const c = text[i];
+        if (q) { if (c === '\\') { i += 2; continue; } if (c === q) q = null; i++; continue; }
+        if (c === '"' || c === "'") { q = c; i++; continue; }
+        if (text.startsWith('/*', i)) { const e = text.indexOf('*/', i + 2); i = e < 0 ? n : e + 2; continue; }
+        if (c === '(' || c === '[') depth++;
+        else if (c === ')' || c === ']') depth--;
+        else if (depth <= 0 && stops.includes(c)) break;
+        i++;
+      }
+      return text.slice(s, i);
+    }
+    function parseDecls(body, at) {
+      const decls = [];
+      let k = 0, s = 0, q = null, depth = 0;
+      const parts = [];
+      body = body.replace(/\/\*[\s\S]*?\*\//g, '');
+      for (; k <= body.length; k++) {
+        const c = body[k];
+        if (k === body.length || (!q && depth === 0 && c === ';')) { parts.push(body.slice(s, k)); s = k + 1; continue; }
+        if (q) { if (c === q) q = null; continue; }
+        if (c === '"' || c === "'") q = c;
+        else if (c === '(') depth++;
+        else if (c === ')') depth--;
+      }
+      for (const p of parts) {
+        if (!p.trim()) continue;
+        const ci = p.indexOf(':');
+        if (ci < 0) { errors.push({ line: lineAt(at), msg: 'Invalid CSS declaration "' + norm(p).slice(0, 40) + '"' }); continue; }
+        let prop = lc(p.slice(0, ci).trim());
+        let value = norm(p.slice(ci + 1));
+        let important = false;
+        if (/!\s*important\s*$/i.test(value)) { important = true; value = value.replace(/!\s*important\s*$/i, '').trim(); }
+        if (!prop) continue;
+        decls.push({ prop, value, important });
+      }
+      return decls;
+    }
+    function parseBlock(nested) {
+      const items = [];
+      while (true) {
+        skipWs();
+        if (i >= n) { if (nested) errors.push({ line: lineAt(n - 1), msg: 'CSS block is missing a closing "}"' }); return items; }
+        if (text[i] === '}') { if (nested) { i++; return items; } errors.push({ line: lineAt(i), msg: 'Unexpected "}" in CSS' }); i++; continue; }
+        if (text[i] === '@') {
+          const st = i;
+          const m = /^@([\w-]+)/.exec(text.slice(i, i + 60));
+          const name = m ? lc(m[1]) : '';
+          i += m ? m[0].length : 1;
+          const prelude = norm(readUntil([';', '{', '}']));
+          if (text[i] === ';' || i >= n || text[i] === '}') {
+            if (text[i] === ';') i++;
+            items.push({ type: 'at', name, prelude, block: null });
+            continue;
+          }
+          i++;
+          if (['font-face', 'page', 'viewport', '-ms-viewport'].includes(name)) {
+            const body = readUntil(['}']);
+            if (text[i] !== '}') errors.push({ line: lineAt(st), msg: '@' + name + ' block is missing a closing "}"' });
+            else i++;
+            items.push({ type: 'at', name, prelude, decls: parseDecls(body, st) });
+          } else {
+            items.push({ type: 'at', name, prelude, block: parseBlock(true) });
+          }
+          continue;
+        }
+        const st = i;
+        const selector = norm(readUntil(['{', '}', ';']));
+        if (text[i] !== '{') {
+          if (selector) errors.push({ line: lineAt(st), msg: 'CSS selector "' + selector.slice(0, 40) + '" has no "{ }" block' });
+          if (i < n && text[i] !== '}') i++;
+          continue;
+        }
+        i++;
+        const body = readUntil(['}']);
+        if (text[i] !== '}') { errors.push({ line: lineAt(st), msg: 'Rule "' + selector.slice(0, 40) + '" is missing a closing "}"' }); }
+        else i++;
+        items.push({ type: 'rule', selector, decls: parseDecls(body, st) });
+      }
+    }
+    const items = parseBlock(false);
+    return { items, errors };
+  }
+
+  function splitSelectors(sel) {
+    const out = []; let depth = 0, s = 0, q = null;
+    for (let k = 0; k < sel.length; k++) {
+      const c = sel[k];
+      if (q) { if (c === q) q = null; continue; }
+      if (c === '"' || c === "'") q = c;
+      else if (c === '(' || c === '[') depth++;
+      else if (c === ')' || c === ']') depth--;
+      else if (c === ',' && depth === 0) { out.push(norm(sel.slice(s, k))); s = k + 1; }
+    }
+    out.push(norm(sel.slice(s)));
+    return out.filter(Boolean);
+  }
+
+  /* ---------------- serializers ---------------- */
+  const declStr = d => d.prop + ': ' + d.value + (d.important ? ' !important' : '') + ';';
+  function formatCSS(items, depth) {
+    const pad = '  '.repeat(depth);
+    const out = [];
+    for (const it of items) {
+      if (it.type === 'rule') {
+        const sels = splitSelectors(it.selector);
+        out.push(pad + sels.join(',\n' + pad) + ' {');
+        it.decls.forEach(d => out.push(pad + '  ' + declStr(d)));
+        out.push(pad + '}');
+      } else if (it.type === 'at') {
+        if (it.decls) {
+          out.push(pad + '@' + it.name + (it.prelude ? ' ' + it.prelude : '') + ' {');
+          it.decls.forEach(d => out.push(pad + '  ' + declStr(d)));
+          out.push(pad + '}');
+        } else if (it.block) {
+          out.push(pad + '@' + it.name + (it.prelude ? ' ' + it.prelude : '') + ' {');
+          const inner = formatCSS(it.block, depth + 1);
+          if (inner) out.push(inner);
+          out.push(pad + '}');
+        } else out.push(pad + '@' + it.name + (it.prelude ? ' ' + it.prelude : '') + ';');
+      }
+    }
+    return out.join('\n');
+  }
+  function attrStr(attrs) {
+    return attrs.map(([k, v]) => {
+      if (v === null) return ' ' + k;
+      if (v.includes('"') && !v.includes("'")) return ' ' + k + "='" + v + "'";
+      return ' ' + k + '="' + v.replace(/"/g, '&quot;') + '"';
+    }).join('');
+  }
+  function serialize(nodes, depth = 0, opts = {}) {
+    const pad = '  '.repeat(depth);
+    const out = [];
+    for (const node of nodes) {
+      if (node.type === 'text') { const t = norm(node.text); if (t) out.push(pad + t); }
+      else if (node.type === 'comment') out.push(pad + '<!--' + node.text + '-->');
+      else if (node.type === 'doctype') out.push(pad + node.raw);
+      else if (node.type === 'cc') {
+        out.push(pad + '<!--[if ' + node.cond + ']>' + (node.revealed ? '<!-->' : ''));
+        const inner = serialize(node.children, depth + 1, opts);
+        if (inner) out.push(inner);
+        out.push(pad + (node.revealed ? '<!--<![endif]-->' : '<![endif]-->'));
+      } else if (node.type === 'element') {
+        const open = '<' + node.rawName + attrStr(node.attrs);
+        if (node.selfClose && !VOID.has(node.name)) { out.push(pad + open + '/>'); continue; }
+        if (VOID.has(node.name)) { out.push(pad + open + (opts.xhtml ? ' />' : '>')); continue; }
+        if (node.name === 'style') {
+          const css = node.cssItems || parseCSS(node.content || '').items;
+          const body = formatCSS(css, depth + 1);
+          out.push(pad + open + '>' + (body ? '\n' + body + '\n' + pad : '') + '</' + node.rawName + '>');
+          continue;
+        }
+        if (RAW.has(node.name)) { out.push(pad + open + '>' + norm(node.content) + '</' + node.rawName + '>'); continue; }
+        const kids = node.children || [];
+        if (kids.every(k => k.type === 'text') && norm(kids.map(k => k.text).join('')).length < 60) {
+          out.push(pad + open + '>' + norm(kids.map(k => k.text).join('')) + '</' + node.rawName + '>');
+        } else {
+          out.push(pad + open + '>');
+          const inner = serialize(kids, depth + 1, opts);
+          if (inner) out.push(inner);
+          out.push(pad + '</' + node.rawName + '>');
+        }
+      }
+    }
+    return out.join('\n');
+  }
+
+  /* ---------------- head extraction / validation ---------------- */
+  function unwrapHead(nodes) {
+    const sig = nodes.filter(n => n.type !== 'text' && n.type !== 'comment');
+    if (sig.length === 1 && sig[0].type === 'element' && sig[0].name === 'head') return { nodes: sig[0].children, wrapped: true, headAttrs: sig[0].attrs };
+    return { nodes, wrapped: false, headAttrs: [] };
+  }
+  function extractHead(src) {
+    const m = /<head\b[^>]*>([\s\S]*?)<\/head\s*>/i.exec(src);
+    let s = m ? m[1] : src;
+    s = s.replace(/<!doctype[^>]*>/gi, '').replace(/<\/?html\b[^>]*>/gi, '').replace(/<body\b[\s\S]*$/i, '')
+      .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '').replace(/<script\b[^>]*\/>/gi, '');
+    return s.trim();
+  }
+
+  const HEAD_OK = new Set(['meta', 'link', 'title', 'style', 'base', 'noscript', 'xml']);
+  function validateHead(src) {
+    const errors = [], warnings = [];
+    if (!String(src || '').trim()) return { ok: false, errors: [{ line: 1, msg: 'The head is empty. Paste the contents of a <head> section.' }], warnings, nodes: [] };
+    const lineOf = lineIndex(src);
+    const { root, errors: pe } = parseHTML(src, 0, lineOf);
+    pe.forEach(e => errors.push(e));
+    const { nodes } = unwrapHead(root.children);
+    let needsExtract = false;
+    const metaKeys = new Map();
+    function walk(list, ctx) {
+      for (const node of list) {
+        if (node.type === 'doctype') { errors.push({ line: lineOf(node.at), msg: 'A <!DOCTYPE> belongs to a full document, not a head.' }); needsExtract = true; }
+        if (node.type === 'text' && !ctx.inXml) warnings.push({ line: lineOf(node.at), msg: 'Stray text "' + norm(node.text).slice(0, 30) + '" will be ignored.' });
+        if (node.type === 'cc') walk(node.children, { ...ctx, inCC: true });
+        if (node.type !== 'element') continue;
+        const name = node.name;
+        const ln = lineOf(node.at);
+        if (name === 'script') { errors.push({ line: ln, msg: '<script> is not allowed. Heads in this library must not contain JavaScript.' }); needsExtract = true; continue; }
+        if (name === 'body' || name === 'html' || (name === 'head' && ctx.depth >= 0)) { errors.push({ line: ln, msg: '<' + name + '> is not allowed. Paste only the head section.' }); needsExtract = true; continue; }
+        for (const [k, v] of node.attrs) {
+          if (/^on/i.test(k)) errors.push({ line: ln, msg: 'Event attribute "' + k + '" is JavaScript and is not allowed.' });
+          if (v && /^\s*javascript:/i.test(v)) errors.push({ line: ln, msg: 'javascript: URLs are not allowed.' });
+        }
+        if (!ctx.inXml && !HEAD_OK.has(name)) {
+          errors.push({ line: ln, msg: '<' + node.rawName + '> is not a valid head element.' });
+          continue;
+        }
+        if (name === 'xml' && !ctx.inCC) warnings.push({ line: ln, msg: '<xml> outside an MSO conditional comment is shown by some clients. Wrap it in <!--[if mso]>.' });
+        if (name === 'meta') {
+          const key = metaKey(node);
+          if (!key) warnings.push({ line: ln, msg: '<meta> has no charset, name, http-equiv or property.' });
+          else if (key !== 'name:format-detection') {
+            if (metaKeys.has(key)) warnings.push({ line: ln, msg: 'Duplicate meta "' + key + '" (also on line ' + metaKeys.get(key) + ').' });
+            else metaKeys.set(key, ln);
+          }
+        }
+        if (name === 'style') {
+          const base = lineOf(node.contentAt || node.at);
+          const { errors: ce } = parseCSS(node.content || '', base);
+          ce.forEach(e => errors.push(e));
+          if (/expression\s*\(|javascript:/i.test(node.content || '')) errors.push({ line: ln, msg: 'CSS expressions and javascript: URLs are not allowed.' });
+        }
+        if (name === 'xml' || name === 'noscript' || ctx.inXml) walk(node.children, { ...ctx, inXml: name === 'xml' || ctx.inXml });
+        else walk(node.children, ctx);
+      }
+    }
+    walk(nodes, { depth: 0 });
+    errors.sort((a, b) => a.line - b.line);
+    return { ok: errors.length === 0, errors, warnings, nodes, needsExtract };
+  }
+
+  /* Turn whatever the user pasted (a full email, a head, a head with junk) into a clean head. */
+  function cleanHead(src) {
+    const raw = String(src || '');
+    const dm = /<!doctype[^>]*>/i.exec(raw);
+    const doctype = dm ? norm(dm[0]) : null;
+    const removed = [];
+    let s = raw;
+    const hasBody = /<body\b/i.test(s);
+    const hm = /<head\b[^>]*>([\s\S]*?)<\/head\s*>/i.exec(s);
+    if (hm) s = hm[1];
+    else {
+      const ho = /<head\b[^>]*>/i.exec(s);
+      if (ho) s = s.slice(ho.index + ho[0].length);
+      s = s.replace(/<body\b[\s\S]*$/i, '');
+    }
+    if (hasBody) removed.push('the email body');
+    s = s.replace(/<!doctype[^>]*>/gi, '').replace(/<\/?html\b[^>]*>/gi, '').replace(/<\/?head\b[^>]*>/gi, '').replace(/<\/body\s*>/gi, '');
+    const scripts = (s.match(/<script\b/gi) || []).length;
+    if (scripts) { s = s.replace(/<script\b[\s\S]*?<\/script\s*>/gi, '').replace(/<script\b[^>]*>/gi, ''); removed.push(scripts === 1 ? 'a script' : scripts + ' scripts'); }
+    s = s.replace(/^\s*\n/gm, m => m).trim();
+    let v = validateHead(s);
+    if (!v.ok) {
+      const { root, errors } = parseHTML(s);
+      if (!errors.length) {
+        let dropped = 0;
+        const filter = (list, inXml) => list.filter(n => {
+          if (n.type === 'text') return inXml;
+          if (n.type === 'doctype') { dropped++; return false; }
+          if (n.type === 'cc') { n.children = filter(n.children, inXml); return true; }
+          if (n.type !== 'element') return true;
+          if (!inXml && !HEAD_OK.has(n.name)) { dropped++; return false; }
+          n.attrs = n.attrs.filter(([k, val]) => { const bad = /^on/i.test(k) || (val && /^\s*javascript:/i.test(val)); if (bad) dropped++; return !bad; });
+          if (n.children) n.children = filter(n.children, inXml || n.name === 'xml');
+          return true;
+        });
+        const out = serialize(filter(root.children, false), 0);
+        const v2 = validateHead(out);
+        if (v2.ok) { s = out; v = v2; if (dropped) removed.push(dropped === 1 ? 'one tag that does not belong in a head' : dropped + ' tags that do not belong in a head'); }
+      }
+    }
+    const hasContent = /<(meta|style|link|title)\b|<!--\[if/i.test(s);
+    return { ok: v.ok && hasContent, html: s, doctype, removed, errors: v.errors, empty: !hasContent };
+  }
+
+  function formatHead(src, opts) {
+    const v = validateHead(src);
+    if (!v.ok) return { ok: false, errors: v.errors };
+    const { root } = parseHTML(src);
+    const u = unwrapHead(root.children);
+    const body = serialize(u.nodes, u.wrapped ? 1 : 0, opts);
+    return { ok: true, text: u.wrapped ? '<head' + attrStr(u.headAttrs) + '>\n' + body + '\n</head>' : body };
+  }
+
+  /* ---------------- classification ---------------- */
+  function metaKey(node) {
+    if (getAttr(node, 'charset') !== null) return 'charset';
+    const he = getAttr(node, 'http-equiv'); if (he) return 'http-equiv:' + lc(he);
+    const nm = getAttr(node, 'name'); if (nm) return 'name:' + lc(nm);
+    const pr = getAttr(node, 'property'); if (pr) return 'property:' + lc(pr);
+    return null;
+  }
+  const isMsoCond = c => /\bmso\b/i.test(c) && !/^\s*!\s*mso\b/i.test(c) && !/\(\s*!\s*mso/i.test(c);
+  const isNotMsoCond = c => /^\s*!\s*mso\b/i.test(c);
+  const FONT_HOST = /fonts\.googleapis\.com|fonts\.gstatic\.com|use\.typekit\.net|fonts\.bunny\.net|use\.fontawesome|fonts\.cdnfonts\.com|cloud\.typography\.com|fast\.fonts\.net|rsms\.me\/inter/i;
+  const isFontUrl = u => FONT_HOST.test(u || '') || /\.(woff2?|ttf|otf|eot)(\?|#|$)/i.test(u || '');
+
+  function selCategory(sel) {
+    const s = lc(sel);
+    if (/\[data-ogs[cb]\]/.test(s)) return 'ogsc';
+    if (/x-apple-data-detectors/.test(s)) return 'apple';
+    if (/#messageviewbody|#messagewebviewdiv/.test(s)) return 'samsung';
+    if (/(^|\s)u\s*[+~]\s*(#body|\.body|div|#\w+|\.\w+)/.test(s) || /\.gmail|\.im\b|span\.im/.test(s)) return 'gmail';
+    if (/\.externalclass|\.readmsgbody|#outlook|\[owa\]|\.x_|\.ogsc|\.ogsb/.test(s)) return 'outlookcom';
+    if (/^:root\b/.test(s)) return 'root';
+    if (!/[.#]/.test(s.replace(/\[[^\]]*\]/g, ''))) return 'reset';
+    if (/^(#bodytable|#bodycell|body\s|html\s)/.test(s) && !/\./.test(s)) return 'reset';
+    return 'tpl';
+  }
+  function classesIn(css) {
+    const set = new Set();
+    String(css).replace(/\.([a-zA-Z_][\w-]*)/g, (m, c) => { if (!/^\d/.test(c)) set.add(c); return m; });
+    return set;
+  }
+  const WEBSAFE = new Set(['arial', 'helvetica', 'helvetica neue', 'verdana', 'tahoma', 'trebuchet ms', 'georgia', 'times', 'times new roman', 'courier', 'courier new', 'segoe ui', 'roboto', 'system-ui', '-apple-system', 'blinkmacsystemfont', 'lucida grande', 'lucida sans unicode', 'garamond', 'palatino', 'palatino linotype', 'book antiqua', 'calibri', 'cambria', 'candara', 'consolas', 'impact', 'gill sans', 'avenir', 'avenir next', 'inherit', 'initial', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy', 'ui-sans-serif', 'ui-serif', 'ui-monospace', 'apple color emoji', 'segoe ui emoji', 'noto color emoji', 'oxygen', 'ubuntu', 'cantarell', 'fira sans', 'droid sans', 'open sans']);
+  const GENERIC = /(^|,)\s*(sans-serif|serif|monospace|cursive|fantasy|system-ui|ui-sans-serif|ui-serif|inherit|initial|unset)\s*$/i;
+  const familiesOf = v => String(v).split(',').map(f => lc(f.replace(/["']/g, '').trim())).filter(Boolean);
+  function fontsFromUrl(url) {
+    const out = [];
+    const u = String(url).replace(/&amp;/g, '&');
+    const re = /family=([^&:]+)/g; let m;
+    while ((m = re.exec(u))) m[1].split('|').forEach(f => out.push(lc(decodeURIComponent(f.split(':')[0].replace(/\+/g, ' ')))));
+    return out;
+  }
+
+  /* ---------------- component extraction ---------------- */
+  const declsKey = decls => decls.map(declStr).join('');
+  function mergeDecls(list) {
+    const out = [];
+    for (const d of list) {
+      if (/^(expression|javascript)/i.test(d.value) || /expression\s*\(|javascript:/i.test(d.value)) continue;
+      const vendorValue = /^-(webkit|moz|ms|o)-/.test(d.value);
+      const idx = out.findIndex(x => x.prop === d.prop && !(vendorValue || /^-(webkit|moz|ms|o)-/.test(x.value)));
+      if (out.some(x => x.prop === d.prop && x.value === d.value && x.important === d.important)) continue;
+      if (idx >= 0) { if (out[idx].important && !d.important) continue; out.splice(idx, 1); }
+      out.push({ ...d });
+    }
+    return out;
+  }
+  function cleanCssItems(items) {
+    const out = [];
+    for (const it of items) {
+      if (it.type === 'rule') { const d = mergeDecls(it.decls); if (d.length) out.push({ type: 'rule', selector: splitSelectors(it.selector).join(', '), decls: d }); }
+      else if (it.type === 'at') {
+        if (it.decls) out.push({ ...it, decls: mergeDecls(it.decls) });
+        else if (it.block) { const b = cleanCssItems(it.block); if (b.length) out.push({ ...it, block: b }); }
+        else if (it.name !== 'charset') out.push(it);
+      }
+    }
+    return out;
+  }
+
+  function extractComponents(src) {
+    const v = validateHead(src);
+    const { root } = parseHTML(src);
+    const nodes = unwrapHead(root.children).nodes;
+    const comp = {
+      metas: new Map(), title: null, links: [], msoSettings: [], msoCss: new Map(), msoAt: [], otherCC: [],
+      fontLinks: [], fontImports: [], fontFaces: [], css: new Map(), sets: { apple: [], gmail: [], samsung: [], outlookcom: [], ogsc: [], tpl: [] },
+      responsive: [], dark: [], fontFamiliesUsed: new Set(), valid: v.ok,
+    };
+    const formatContents = [];
+    function addRule(sel, decls, where) {
+      const cat = selCategory(sel);
+      if (where === 'mso') {
+        const prev = comp.msoCss.get(sel) || [];
+        comp.msoCss.set(sel, prev.concat(decls)); return;
+      }
+      if (cat === 'reset' || cat === 'root') {
+        const key = cat + ':' + lc(sel);
+        const prev = comp.css.get(key);
+        comp.css.set(key, { cat, sel, decls: (prev ? prev.decls : []).concat(decls) });
+      } else comp.sets[cat].push({ sel, decls });
+      decls.forEach(d => { if (d.prop === 'font-family') familiesOf(d.value).forEach(f => comp.fontFamiliesUsed.add(f)); });
+    }
+    function handleCss(text, where) {
+      const { items } = parseCSS(text);
+      for (const it of items) {
+        if (it.type === 'rule') { splitSelectors(it.selector).forEach(sel => addRule(sel, it.decls, where)); continue; }
+        if (it.type !== 'at') continue;
+        if (it.name === 'charset') continue;
+        if (it.name === 'import') { if (where !== 'mso') comp.fontImports.push(it); continue; }
+        if (it.name === 'font-face') { if (where !== 'mso') comp.fontFaces.push(it); continue; }
+        if (where === 'mso') { comp.msoAt.push(it); continue; }
+        if (it.name === 'media' && /prefers-color-scheme/i.test(it.prelude)) { comp.dark.push(it); continue; }
+        if (it.name === 'media') {
+          const ogsc = (it.block || []).filter(r => r.type === 'rule' && /\[data-ogs[cb]\]/i.test(r.selector));
+          comp.responsive.push(it);
+          if (ogsc.length && false) comp.sets.ogsc.push(...ogsc);
+          continue;
+        }
+        comp.sets.tpl.push({ at: it });
+      }
+    }
+    function walk(list, ctx) {
+      for (const node of list) {
+        if (node.type === 'cc') {
+          if (ctx.mso) { continue; }
+          if (!node.revealed && isMsoCond(node.cond)) {
+            const flat = JSON.stringify(node.children);
+            if (/officedocumentsettings/i.test(flat)) {
+              const settings = [], rest = [];
+              node.children.forEach(ch => (/officedocumentsettings/i.test(JSON.stringify(ch)) ? settings : rest).push(ch));
+              comp.msoSettings.push({ cond: node.cond, children: settings });
+              rest.forEach(ch => walk([ch], { mso: true, cond: node.cond }));
+              rest.filter(ch => ch.type === 'element' && ch.name === 'style').forEach(st => handleCss(st.content || '', 'mso'));
+            } else {
+              node.children.filter(ch => ch.type === 'element' && ch.name === 'style').forEach(st => handleCss(st.content || '', 'mso'));
+              const others = node.children.filter(ch => !(ch.type === 'element' && ch.name === 'style') && ch.type !== 'text' && ch.type !== 'comment');
+              if (others.length) comp.otherCC.push({ cond: node.cond, revealed: false, children: others });
+            }
+            continue;
+          }
+          if (node.revealed && isNotMsoCond(node.cond)) { walk(node.children, { notMso: true }); continue; }
+          comp.otherCC.push({ cond: node.cond, revealed: node.revealed, children: node.children.filter(c => c.type !== 'comment') });
+          continue;
+        }
+        if (node.type !== 'element') continue;
+        if (ctx.mso) continue;
+        const name = node.name;
+        if (name === 'script' || name === 'body' || name === 'html' || name === 'base') continue;
+        if (name === 'meta') {
+          const key = metaKey(node);
+          if (!key) continue;
+          const attrs = node.attrs.filter(([k, v]) => !/^on/i.test(k) && !(v && /javascript:/i.test(v)));
+          if (key === 'name:format-detection') { formatContents.push(getAttr(node, 'content') || ''); continue; }
+          if (!comp.metas.has(key)) comp.metas.set(key, attrs);
+          continue;
+        }
+        if (name === 'title') { if (comp.title === null) comp.title = norm(node.content); continue; }
+        if (name === 'link') {
+          const href = getAttr(node, 'href') || '';
+          if (isFontUrl(href) || /preconnect|dns-prefetch/i.test(getAttr(node, 'rel') || '') && isFontUrl(href)) comp.fontLinks.push(node.attrs);
+          else if (/preconnect|dns-prefetch/i.test(getAttr(node, 'rel') || '')) { if (FONT_HOST.test(href)) comp.fontLinks.push(node.attrs); }
+          else comp.links.push(node.attrs);
+          continue;
+        }
+        if (name === 'style') { handleCss(node.content || '', 'main'); continue; }
+        if (name === 'noscript') { walk(node.children, ctx); continue; }
+      }
+    }
+    walk(nodes, {});
+    if (formatContents.length) {
+      const parts = [];
+      formatContents.join(',').split(/[,;]/).map(s => lc(norm(s)).replace(/\s*=\s*/, '=')).filter(Boolean).forEach(p => { if (!parts.includes(p)) parts.push(p); });
+      comp.metas.set('name:format-detection', [['name', 'format-detection'], ['content', parts.join(', ')]]);
+    }
+    comp.fontLinks.forEach(a => { const h = a.find(x => lc(x[0]) === 'href'); if (h) fontsFromUrl(h[1]).forEach(f => comp.fontFamiliesLoaded = (comp.fontFamiliesLoaded || new Set()).add(f)); });
+    comp.fontImports.forEach(it => fontsFromUrl(it.prelude).forEach(f => comp.fontFamiliesLoaded = (comp.fontFamiliesLoaded || new Set()).add(f)));
+    comp.fontFaces.forEach(ff => ff.decls.filter(d => d.prop === 'font-family').forEach(d => familiesOf(d.value).forEach(f => comp.fontFamiliesLoaded = (comp.fontFamiliesLoaded || new Set()).add(f))));
+    comp.fontFamiliesLoaded = comp.fontFamiliesLoaded || new Set();
+    return comp;
+  }
+
+  /* ---------------- feature detection ---------------- */
+  const FEATURES = [
+    { id: 'core', name: 'Core meta', desc: 'charset, viewport and X-UA-Compatible' },
+    { id: 'mso', name: 'Outlook MSO settings', desc: 'OfficeDocumentSettings in an MSO conditional' },
+    { id: 'retina', name: 'Retina (96 PPI)', desc: '<o:PixelsPerInch>96</o:PixelsPerInch>' },
+    { id: 'responsive', name: 'Responsive media query', desc: '@media width breakpoints' },
+    { id: 'dark', name: 'Dark mode', desc: 'color-scheme meta and prefers-color-scheme' },
+    { id: 'ogsc', name: 'Outlook.com dark', desc: '[data-ogsc] / [data-ogsb] rules' },
+    { id: 'apple', name: 'Apple link fix', desc: 'a[x-apple-data-detectors]' },
+    { id: 'gmail', name: 'Gmail fix', desc: 'u + #body a' },
+    { id: 'samsung', name: 'Samsung fix', desc: '#MessageViewBody a' },
+    { id: 'ios', name: 'iOS no-reformat', desc: 'x-apple-disable-message-reformatting' },
+    { id: 'format', name: 'Format detection', desc: 'format-detection meta' },
+    { id: 'fonts', name: 'Web fonts', desc: 'font loading with fallbacks' },
+    { id: 'msocss', name: 'Outlook-only CSS', desc: '<style> inside <!--[if mso]>' },
+  ];
+  function detectFeatures(src) {
+    const s = String(src);
+    const has = re => re.test(s);
+    const msoStyle = (() => {
+      const re = /<!--\[if\s+([^\]]+)\]>(?!<!-->)([\s\S]*?)<!\[endif\]-->/gi; let m;
+      while ((m = re.exec(s))) if (isMsoCond(m[1]) && /<style/i.test(m[2])) return true;
+      return false;
+    })();
+    const ffVals = []; s.replace(/@font-face\s*\{[^}]*\}/gi, '').replace(/font-family\s*:\s*([^;}{]+)/gi, (m, v) => { ffVals.push(v.replace(/!important/i, '').trim()); return m; });
+    const fontsLoaded = /<link[^>]+href=["'][^"']*(fonts\.googleapis|typekit|fonts\.bunny|\.woff)/i.test(s) || /@import[^;]*(fonts\.|\.woff)/i.test(s) || /@font-face/i.test(s);
+    return {
+      core: has(/<meta[^>]+charset/i) && has(/<meta[^>]+name=["']?viewport/i),
+      mso: has(/<o:OfficeDocumentSettings/i) && has(/<!--\[if[^\]]*mso/i),
+      retina: has(/<o:PixelsPerInch>\s*96\s*<\/o:PixelsPerInch>/i),
+      responsive: has(/@media[^{]*(max-width|min-width|max-device-width)/i),
+      dark: has(/prefers-color-scheme\s*:\s*dark/i) && has(/<meta[^>]+name=["']?(color-scheme|supported-color-schemes)/i),
+      ogsc: has(/\[data-ogs[cb]\]/i),
+      apple: has(/x-apple-data-detectors/i),
+      gmail: has(/u\s*\+\s*(#body|\.body)/i),
+      samsung: has(/#MessageViewBody|#MessageWebViewDiv/i),
+      ios: has(/name=["']?x-apple-disable-message-reformatting/i),
+      format: has(/name=["']?format-detection/i),
+      fonts: fontsLoaded && ffVals.length > 0 && ffVals.every(v => GENERIC.test(v) || /^inherit$/i.test(v)),
+      msocss: msoStyle,
+    };
+  }
+
+  /* ---------------- built-in compatibility layer ---------------- */
+  const D = (prop, value, important) => ({ prop, value, important: !!important });
+  const LINKRESET = [D('color', 'inherit', 1), D('text-decoration', 'none', 1), D('font-size', 'inherit', 1), D('font-family', 'inherit', 1), D('font-weight', 'inherit', 1), D('line-height', 'inherit', 1)];
+  const BUILTIN = {
+    metas: {
+      'charset': [['charset', 'utf-8']],
+      'name:viewport': [['name', 'viewport'], ['content', 'width=device-width, initial-scale=1']],
+      'http-equiv:x-ua-compatible': [['http-equiv', 'X-UA-Compatible'], ['content', 'IE=edge']],
+      'name:x-apple-disable-message-reformatting': [['name', 'x-apple-disable-message-reformatting']],
+      'name:format-detection': [['name', 'format-detection'], ['content', 'telephone=no, date=no, address=no, email=no, url=no']],
+      'name:color-scheme': [['name', 'color-scheme'], ['content', 'light dark']],
+      'name:supported-color-schemes': [['name', 'supported-color-schemes'], ['content', 'light dark']],
+    },
+    msoSettings: { cond: 'mso', children: parseHTML('<noscript><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>').root.children },
+    msoCss: [
+      ['table', [D('border-collapse', 'collapse'), D('border-spacing', '0'), D('mso-table-lspace', '0pt'), D('mso-table-rspace', '0pt')]],
+      ['td', [D('mso-line-height-rule', 'exactly')]],
+      ['img', [D('-ms-interpolation-mode', 'bicubic')]],
+    ],
+    msoFont: ['body, table, td, p, a, li, h1, h2, h3', [D('font-family', 'Arial, Helvetica, sans-serif', 1)]],
+    root: [D('color-scheme', 'light dark'), D('supported-color-schemes', 'light dark')],
+    apple: [{ sel: 'a[x-apple-data-detectors]', decls: LINKRESET }],
+    gmail: [{ sel: 'u + #body a', decls: LINKRESET }],
+    samsung: [{ sel: '#MessageViewBody a', decls: LINKRESET }],
+    responsive: [{ type: 'at', name: 'media', prelude: 'only screen and (max-width: 600px)', block: [
+      { type: 'rule', selector: '.email-container', decls: [D('width', '100%', 1), D('max-width', '100%', 1)] },
+      { type: 'rule', selector: '.stack-column', decls: [D('display', 'block', 1), D('width', '100%', 1), D('max-width', '100%', 1)] },
+      { type: 'rule', selector: '.fluid', decls: [D('max-width', '100%', 1), D('height', 'auto', 1)] },
+    ] }],
+    dark: [{ type: 'at', name: 'media', prelude: '(prefers-color-scheme: dark)', block: [
+      { type: 'rule', selector: '.dark-mode-bg', decls: [D('background-color', '#1e1e1e', 1)] },
+      { type: 'rule', selector: '.dark-mode-text', decls: [D('color', '#f2f2f2', 1)] },
+      { type: 'rule', selector: '.dark-img', decls: [D('display', 'block', 1), D('max-height', 'none', 1)] },
+      { type: 'rule', selector: '.light-img', decls: [D('display', 'none', 1)] },
+    ] }],
+    ogsc: [
+      { sel: '[data-ogsc] .dark-mode-text', decls: [D('color', '#f2f2f2', 1)] },
+      { sel: '[data-ogsb] .dark-mode-bg', decls: [D('background-color', '#1e1e1e', 1)] },
+    ],
+    fontLinks: [[['href', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'], ['rel', 'stylesheet']]],
+    fontFamily: ['.web-font', [D('font-family', "'Inter', Arial, Helvetica, sans-serif")]],
+  };
+
+  /* ---------------- library pool ---------------- */
+  function buildPool(heads, cache) {
+    const pool = { slots: new Map(), heads: new Map(), headCount: 0 };
+    const add = (slot, key, payload, headId, extra) => {
+      if (!pool.slots.has(slot)) pool.slots.set(slot, { slot, variants: new Map(), heads: new Set(), ...extra });
+      const s = pool.slots.get(slot);
+      s.heads.add(headId);
+      if (!s.variants.has(key)) s.variants.set(key, { key, payload, sources: [] });
+      s.variants.get(key).sources.push(headId);
+    };
+    for (const h of heads) {
+      const ck = h.id + ':' + h.updatedAt;
+      let c = cache && cache.get(ck);
+      if (!c) { c = extractComponents(h.html); if (cache) cache.set(ck, c); }
+      if (!c.valid) continue;
+      pool.headCount++;
+      pool.heads.set(h.id, c);
+      for (const [key, attrs] of c.metas) add('meta:' + key, hash(lc(attrStr(attrs))), attrs, h.id, { kind: 'meta', metaKey: key });
+      if (c.title) add('title', hash(c.title), c.title, h.id, { kind: 'title' });
+      for (const attrs of c.links) { const href = (attrs.find(a => lc(a[0]) === 'href') || [0, ''])[1]; add('link:' + lc(href), hash(attrStr(attrs)), attrs, h.id, { kind: 'link' }); }
+      c.msoSettings.forEach(ms => add('msoSettings', hash(norm(serialize(ms.children))), ms, h.id, { kind: 'msoSettings' }));
+      for (const [sel, decls] of c.msoCss) { const d = mergeDecls(decls); if (d.length) add('mso:' + lc(sel), hash(declsKey(d)), { sel, decls: d }, h.id, { kind: 'msoCss' }); }
+      c.msoAt.forEach(at => add('msoAt:' + lc(at.name + ' ' + at.prelude), hash(formatCSS([at], 0)), at, h.id, { kind: 'msoAt' }));
+      c.otherCC.forEach(cc => { if (cc.children.length) add('cc:' + lc(cc.cond) + (cc.revealed ? ':r' : ''), hash(norm(serialize([{ type: 'cc', ...cc }]))), cc, h.id, { kind: 'cc' }); });
+      if (c.fontLinks.length || c.fontImports.length || c.fontFaces.length) {
+        const payload = { links: c.fontLinks, imports: c.fontImports, faces: c.fontFaces, families: [...c.fontFamiliesLoaded] };
+        add('fonts', hash(JSON.stringify([payload.links, formatCSS(payload.imports.concat(payload.faces), 0)])), payload, h.id, { kind: 'fonts' });
+      }
+      for (const [key, r] of c.css) { const d = mergeDecls(r.decls); if (d.length) add('css:' + key, hash(declsKey(d)), { sel: r.sel, decls: d }, h.id, { kind: 'css', cat: r.cat }); }
+      for (const cat of ['apple', 'gmail', 'samsung', 'outlookcom', 'ogsc', 'tpl']) {
+        const rules = c.sets[cat];
+        if (!rules.length) continue;
+        const payload = rules.map(r => r.at ? r : { sel: r.sel, decls: mergeDecls(r.decls) }).filter(r => r.at || r.decls.length);
+        if (!payload.length) continue;
+        const k = hash(payload.map(r => r.at ? formatCSS([r.at], 0) : r.sel + '{' + declsKey(r.decls) + '}').join('|'));
+        add('set:' + cat, k, payload, h.id, { kind: 'set', cat });
+      }
+      if (c.responsive.length) add('responsive', hash(formatCSS(cleanCssItems(c.responsive), 0)), cleanCssItems(c.responsive), h.id, { kind: 'media' });
+      if (c.dark.length) add('dark', hash(formatCSS(cleanCssItems(c.dark), 0)), cleanCssItems(c.dark), h.id, { kind: 'media' });
+    }
+    for (const s of pool.slots.values()) s.share = pool.headCount ? s.heads.size / pool.headCount : 0;
+    return pool;
+  }
+
+  const ALWAYS_META = new Set(['charset', 'name:viewport', 'http-equiv:x-ua-compatible', 'name:x-apple-disable-message-reformatting', 'name:format-detection', 'name:color-scheme', 'name:supported-color-schemes', 'http-equiv:content-type']);
+  function slotIncluded(s, opts, rand) {
+    if (s.kind === 'meta' && ALWAYS_META.has(s.metaKey)) return true;
+    if (s.kind === 'title') return !!opts.includeTitle;
+    if (['msoSettings', 'fonts', 'media', 'set'].includes(s.kind)) return true;
+    if (s.kind === 'css' && s.cat === 'root') return true;
+    const th = opts.threshold;
+    if (s.share >= th) return true;
+    return rand() < (s.share / th) * 0.5;
+  }
+  function variantValid(s, v) {
+    if (s.kind !== 'meta') return true;
+    const content = lc((v.payload.find(a => lc(a[0]) === 'content') || [0, ''])[1] || '');
+    if (s.metaKey === 'name:viewport') return /width\s*=\s*device-width/.test(content);
+    if (s.metaKey === 'name:color-scheme' || s.metaKey === 'name:supported-color-schemes') return /dark/.test(content) && /light/.test(content);
+    if (s.metaKey === 'name:format-detection') return /telephone\s*=\s*no/.test(content);
+    if (s.metaKey === 'charset') return /utf-?8/i.test((v.payload.find(a => lc(a[0]) === 'charset') || [0, ''])[1]);
+    if (s.metaKey === 'http-equiv:content-type') return /utf-?8/i.test(content);
+    return true;
+  }
+  function pickWeighted(list, weightFn, rand) {
+    if (!list.length) return null;
+    const ws = list.map(weightFn);
+    const total = ws.reduce((a, b) => a + b, 0);
+    let r = rand() * total;
+    for (let k = 0; k < list.length; k++) { r -= ws[k]; if (r <= 0) return list[k]; }
+    return list[list.length - 1];
+  }
+  const popWeight = v => 1 + Math.log2(new Set(v.sources).size);
+
+  function combinationsLog10(pool, opts) {
+    let lg = 0, counted = 0;
+    for (const s of pool.slots.values()) {
+      if (s.kind === 'meta' && !ALWAYS_META.has(s.metaKey) && s.share < opts.threshold) continue;
+      if ((s.kind === 'css' && s.cat !== 'root' || s.kind === 'msoCss') && s.share < opts.threshold) { lg += Math.log10(2); continue; }
+      if (s.kind === 'title' && !opts.includeTitle) continue;
+      const vs = [...s.variants.values()].filter(v => variantValid(s, v));
+      if (vs.length > 1) { lg += Math.log10(vs.length); counted++; }
+    }
+    return lg;
+  }
+
+  /* ---------------- generation ---------------- */
+  function compose(pool, seed, opts, headNames) {
+    const rand = rng(seed);
+    const picks = [];
+    const nameOf = id => headNames.get(id) || id;
+    const choose = (s, filter) => {
+      let vs = [...s.variants.values()].filter(v => variantValid(s, v));
+      if (filter) { const f = vs.filter(filter); if (f.length) vs = f; }
+      const v = pickWeighted(vs, popWeight, rand);
+      if (!v) return null;
+      const src = v.sources[Math.floor(rand() * v.sources.length)];
+      picks.push({ slot: s.slot, variant: v.key, source: src, sources: [...new Set(v.sources)].length });
+      return { v, src };
+    };
+    const slots = pool.slots;
+    const get = k => slots.get(k);
+
+    // 1. anchor: responsive set
+    let anchor = null, responsive = null, dark = null, ogsc = null, tpl = null, fonts = null;
+    if (get('responsive')) { const r = choose(get('responsive')); responsive = r.v.payload; anchor = r.src; }
+    const anchorComp = anchor ? pool.heads.get(anchor) : null;
+    const anchorClasses = anchorComp ? classesIn(JSON.stringify([anchorComp.sets.tpl, anchorComp.responsive])) : new Set();
+    // 2. template rules follow the anchor head
+    if (anchorComp && anchorComp.sets.tpl.length && get('set:tpl')) {
+      const s = get('set:tpl');
+      const v = [...s.variants.values()].find(x => x.sources.includes(anchor));
+      if (v) { tpl = v.payload; picks.push({ slot: s.slot, variant: v.key, source: anchor, sources: new Set(v.sources).size, dep: 'responsive' }); }
+    }
+    // 3. dark mode compatible with anchor classes
+    const compatClasses = payload => { const cl = classesIn(JSON.stringify(payload)); if (!anchorComp) return true; for (const c of cl) if (!anchorClasses.has(c)) return false; return true; };
+    let darkSrc = null;
+    if (get('dark')) { const r = choose(get('dark'), v => v.sources.includes(anchor) || compatClasses(v.payload)); dark = r.v.payload; darkSrc = r.src; }
+    // 4. Outlook.com dark pairs with the dark source
+    let ogscDerived = false;
+    if (get('set:ogsc') && [...get('set:ogsc').variants.values()].some(v => v.sources.includes(darkSrc))) {
+      const r = choose(get('set:ogsc'), v => v.sources.includes(darkSrc)); ogsc = r.v.payload;
+    } else if (dark) {
+      const d = deriveOgsc(dark);
+      if (d.length) { ogsc = d; ogscDerived = true; picks.push({ slot: 'set:ogsc', variant: 'derived:' + hash(JSON.stringify(d)), source: darkSrc, sources: 1, dep: 'dark' }); }
+    }
+    if (!ogsc && get('set:ogsc')) {
+      const s = get('set:ogsc');
+      const compat = [...s.variants.values()].filter(v => compatClasses(v.payload));
+      if (compat.length) { const r = choose(s, v => compatClasses(v.payload)); ogsc = r.v.payload; }
+    }
+    // 5. fonts compatible with families the template uses
+    const needFamilies = anchorComp ? [...anchorComp.fontFamiliesUsed].filter(f => !WEBSAFE.has(f)) : [];
+    if (get('fonts')) { const r = choose(get('fonts'), v => needFamilies.every(f => v.payload.families.includes(f))); fonts = r.v.payload; }
+    const loaded = new Set(fonts ? fonts.families : []);
+    const familyOk = decls => decls.every(d => d.prop !== 'font-family' || familiesOf(d.value).every(f => WEBSAFE.has(f) || loaded.has(f)));
+
+    // 6. remaining slots
+    const metas = [], links = [], mso = [], msoAt = [], cssRules = { root: [], reset: [] }, sets = {}, ccs = [];
+    let msoSettings = null, title = null;
+    const ordered = [...slots.values()].sort((a, b) => a.slot < b.slot ? -1 : 1);
+    for (const s of ordered) {
+      if (['responsive', 'dark', 'set:ogsc', 'set:tpl', 'fonts'].includes(s.slot)) continue;
+      if (!slotIncluded(s, opts, rand)) continue;
+      if (s.kind === 'css') {
+        const r = choose(s, v => familyOk(v.payload.decls)); if (r) cssRules[s.cat].push(r.v.payload); continue;
+      }
+      const r = choose(s);
+      if (!r) continue;
+      const p = r.v.payload;
+      if (s.kind === 'meta') metas.push([s.metaKey, p]);
+      else if (s.kind === 'title') title = p;
+      else if (s.kind === 'link') links.push(p);
+      else if (s.kind === 'msoSettings') msoSettings = p;
+      else if (s.kind === 'msoCss') mso.push(p);
+      else if (s.kind === 'msoAt') msoAt.push(p);
+      else if (s.kind === 'cc') ccs.push(p);
+      else if (s.kind === 'set') sets[s.cat] = p;
+    }
+
+    /* ---- compatibility layer ---- */
+    const builtins = [];
+    const metaMap = new Map(metas);
+    for (const [k, attrs] of Object.entries(BUILTIN.metas)) if (!metaMap.has(k)) { metaMap.set(k, attrs); builtins.push('meta:' + k); }
+    if (metaMap.has('http-equiv:content-type')) {
+      const a = metaMap.get('http-equiv:content-type');
+      if (!/utf-?8/i.test((a.find(x => lc(x[0]) === 'content') || [0, ''])[1] || '')) metaMap.set('http-equiv:content-type', [['http-equiv', 'Content-Type'], ['content', 'text/html; charset=UTF-8']]);
+    }
+    if (!msoSettings) { msoSettings = BUILTIN.msoSettings; builtins.push('msoSettings'); }
+    else if (!/pixelsperinch>\s*96/i.test(serialize(msoSettings.children))) {
+      msoSettings = JSON.parse(JSON.stringify(msoSettings));
+      const fix = n => { for (const c of n) { if (c.type === 'element' && c.name === 'o:officedocumentsettings') { c.children = c.children.filter(x => !(x.type === 'element' && x.name === 'o:pixelsperinch')); c.children.push({ type: 'element', name: 'o:pixelsperinch', rawName: 'o:PixelsPerInch', attrs: [], selfClose: false, children: [{ type: 'text', text: '96' }] }); return true; } if (c.children && fix(c.children)) return true; } return false; };
+      fix(msoSettings.children); builtins.push('retina-patch');
+    }
+    if (!responsive) { responsive = BUILTIN.responsive; builtins.push('responsive'); }
+    if (!dark) { dark = BUILTIN.dark; builtins.push('dark'); }
+    if (!ogsc) { ogsc = BUILTIN.ogsc; builtins.push('ogsc'); }
+    for (const k of ['apple', 'gmail', 'samsung']) if (!sets[k]) { sets[k] = BUILTIN[k]; builtins.push(k); }
+    let fontLinks = fonts ? fonts.links : null, fontAt = fonts ? fonts.imports.concat(fonts.faces) : [];
+    let builtInFontRule = null;
+    if (!fonts) { fontLinks = BUILTIN.fontLinks; builtins.push('fonts'); builtInFontRule = BUILTIN.fontFamily; }
+    if (!mso.length) { BUILTIN.msoCss.forEach(([sel, decls]) => mso.push({ sel, decls })); builtins.push('msoCss'); }
+    if (!mso.some(r => r.decls.some(d => d.prop === 'font-family'))) { mso.push({ sel: BUILTIN.msoFont[0], decls: BUILTIN.msoFont[1] }); builtins.push('msoFont'); }
+    if (!cssRules.root.length) cssRules.root.push({ sel: ':root', decls: BUILTIN.root.slice() });
+    else if (!cssRules.root.some(r => r.decls.some(d => d.prop === 'color-scheme'))) { cssRules.root[0] = { sel: cssRules.root[0].sel, decls: cssRules.root[0].decls.concat(BUILTIN.root) }; }
+
+    /* ---- font fallbacks ---- */
+    const fallbackFixes = [];
+    const fixFamily = d => {
+      if (d.prop !== 'font-family') return d;
+      if (GENERIC.test(d.value) || /^(inherit|initial|unset)$/i.test(d.value)) return d;
+      const serifish = /georgia|times|garamond|playfair|merriweather|lora|serif display|libre baskerville|cormorant|pt serif|noto serif|dm serif|palatino/i.test(d.value);
+      const have = familiesOf(d.value);
+      const add = (serifish ? ['Georgia', 'serif'] : ['Arial', 'Helvetica', 'sans-serif']).filter(f => !have.includes(lc(f)));
+      const nv = d.value + ', ' + add.join(', ');
+      fallbackFixes.push(d.value);
+      return { ...d, value: nv };
+    };
+    const fixRules = rules => rules.map(r => ({ ...r, decls: r.decls.map(fixFamily) }));
+    const fixItems = items => items.map(it => it.type === 'rule' ? { ...it, decls: it.decls.map(fixFamily) } : it.block ? { ...it, block: fixItems(it.block) } : it);
+
+    /* ---- assemble ---- */
+    const groupRules = rules => {
+      const out = [];
+      for (const r of rules) {
+        if (r.at) { out.push(r.at); continue; }
+        const key = declsKey(r.decls);
+        const ex = out.find(x => x.type === 'rule' && x._k === key);
+        if (ex) { if (!splitSelectors(ex.selector).includes(r.sel)) ex.selector += ', ' + r.sel; }
+        else out.push({ type: 'rule', selector: r.sel, decls: r.decls, _k: key });
+      }
+      return out.map(({ _k, ...x }) => x);
+    };
+    const nodes = [];
+    const meta = attrs => ({ type: 'element', name: 'meta', rawName: 'meta', attrs, children: [] });
+    const metaOrder = ['charset', 'http-equiv:content-type', 'name:viewport', 'http-equiv:x-ua-compatible', 'name:x-apple-disable-message-reformatting', 'name:format-detection', 'name:color-scheme', 'name:supported-color-schemes'];
+    metaOrder.forEach(k => { if (metaMap.has(k)) nodes.push(meta(metaMap.get(k))); });
+    [...metaMap.keys()].filter(k => !metaOrder.includes(k)).sort().forEach(k => nodes.push(meta(metaMap.get(k))));
+    if (title !== null) nodes.push({ type: 'element', name: 'title', rawName: 'title', attrs: [], content: title, children: [] });
+    links.forEach(a => nodes.push({ type: 'element', name: 'link', rawName: 'link', attrs: a, children: [] }));
+    nodes.push({ type: 'cc', cond: msoSettings.cond || 'mso', revealed: false, children: msoSettings.children });
+    const fontKids = [];
+    (fontLinks || []).forEach(a => fontKids.push({ type: 'element', name: 'link', rawName: 'link', attrs: a, children: [] }));
+    if (fontAt.length) fontKids.push({ type: 'element', name: 'style', rawName: 'style', attrs: [], cssItems: cleanCssItems(fontAt), children: [] });
+    if (fontKids.length) nodes.push({ type: 'cc', cond: '!mso', revealed: true, children: fontKids });
+    const baseItems = [];
+    // group per category so cascade order across categories is kept
+    const cats = [fixRules(cssRules.root), fixRules(cssRules.reset), builtInFontRule ? [{ sel: builtInFontRule[0], decls: builtInFontRule[1] }] : [], tpl ? tpl.map(r => r.at ? r : { sel: r.sel, decls: r.decls.map(fixFamily) }) : [], fixRules(sets.outlookcom || []), fixRules(sets.apple), fixRules(sets.gmail), fixRules(sets.samsung)];
+    cats.forEach(c => groupRules(c).forEach(x => baseItems.push(x)));
+    const styleEl = (items) => ({ type: 'element', name: 'style', rawName: 'style', attrs: [['type', 'text/css']], cssItems: cleanCssItems(items), children: [] });
+    nodes.push(styleEl(baseItems));
+    nodes.push(styleEl(fixItems(responsive)));
+    nodes.push(styleEl(fixItems(dark).concat(groupRules(ogsc))));
+    ccs.forEach(cc => nodes.push({ type: 'cc', ...cc }));
+    nodes.push({ type: 'cc', cond: 'mso', revealed: false, children: [styleEl(groupRules(mso.map(r => ({ sel: r.sel, decls: r.decls }))).concat(msoAt))] });
+
+    const html = '<head>\n' + serialize(nodes, 1, opts) + '\n</head>';
+    const sources = [...new Set(picks.map(p => p.source))];
+    return { html, picks, builtins, sources, anchor, fallbackFixes, signature: hash(picks.map(p => p.slot + '=' + p.variant).sort().join('|')) };
+  }
+
+  function deriveOgsc(darkItems) {
+    const out = [];
+    const visit = items => items.forEach(it => {
+      if (it.type === 'at' && it.block && /prefers-color-scheme\s*:\s*dark/i.test(it.prelude)) {
+        it.block.forEach(r => {
+          if (r.type !== 'rule') return;
+          const bg = r.decls.filter(d => /^background(-color|-image)?$/.test(d.prop));
+          const fg = r.decls.filter(d => /^(color|border(-\w+)?-color)$/.test(d.prop));
+          splitSelectors(r.selector).forEach(sel => {
+            if (/^(:root|html|body)\b/i.test(sel) || /\[data-ogs/i.test(sel)) return;
+            if (bg.length) out.push({ sel: '[data-ogsb] ' + sel, decls: bg.map(d => ({ ...d, important: true })) });
+            if (fg.length) out.push({ sel: '[data-ogsc] ' + sel, decls: fg.map(d => ({ ...d, important: true })) });
+          });
+        });
+      } else if (it.type === 'at' && it.block) visit(it.block);
+    });
+    visit(darkItems);
+    return out;
+  }
+
+  /* ================= STRONG MIX (port of head-mixer.html) =================
+     Property-level mixing: every selector collects every value seen for each
+     property across all heads; each run keeps selectors by chance and picks one
+     value per property. Fixed meta / MSO parts and random breakpoints as in the
+     original. Differences: seeded randomness, Outlook-only CSS from your heads is
+     not merged into normal CSS, and web fonts + Outlook.com dark are always kept. */
+  const STRONG_CORE = 'body{margin:0 !important;padding:0 !important;width:100% !important;min-width:100% !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}' +
+    'table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse}' +
+    'img{border:0;outline:none;text-decoration:none;height:auto;-ms-interpolation-mode:bicubic}' +
+    'a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important}' +
+    'u+#body a{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit}' +
+    '#MessageViewBody a{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit}' +
+    '@media (prefers-color-scheme:dark){.dark-img{display:block !important}.light-img{display:none !important}}';
+  const STRONG_CORE_SEL = ['body', 'table, td', 'img', 'a[x-apple-data-detectors]', 'u + #body a', 'u+#body a', '#MessageViewBody a', '.dark-img', '.light-img'];
+  const sNormSel = sel => splitSelectors(sel).join(', ');
+
+  function buildStrongLib(heads, pool) {
+    const lib = { base: new Map(), main: new Map(), small: new Map(), dark: new Map(), fonts: [], fontSrc: [], titles: [], linkSets: [] };
+    const addRule = (map, sel, decls, src) => {
+      if (!sel || !decls.length) return;
+      let e = map.get(sel); if (!e) { e = new Map(); map.set(sel, e); }
+      decls.forEach(([p, v]) => { let a = e.get(p); if (!a) { a = []; e.set(p, a); } if (!a.some(x => x.v === v)) a.push({ v, src }); });
+    };
+    const toDecls = list => list.filter(d => !/expression\s*\(|javascript:/i.test(d.value)).map(d => [d.prop, d.value + (d.important ? ' !important' : '')]);
+    const ingest = (items, src) => {
+      for (const it of items) {
+        if (it.type === 'rule') {
+          const sel = sNormSel(it.selector);
+          if (/\[data-og(sc|sb)\]/i.test(sel)) addRule(lib.dark, sNormSel(sel.replace(/\[data-og(sc|sb)\]\s*/gi, '')), toDecls(it.decls), src);
+          else addRule(lib.base, sel, toDecls(it.decls), src);
+        } else if (it.type === 'at' && it.name === 'font-face' && it.decls) {
+          const f = '@font-face {\n' + it.decls.map(d => '  ' + declStr(d)).join('\n') + '\n}';
+          if (!lib.fonts.includes(f)) { lib.fonts.push(f); lib.fontSrc.push(src); }
+        } else if (it.type === 'at' && it.name === 'media' && it.block) {
+          const q = lc(it.prelude).trim();
+          if (q === '' || q === 'screen' || q === 'all') { ingest(it.block, src); continue; }
+          let target = null;
+          if (/prefers-color-scheme\s*:\s*dark/.test(q)) target = lib.dark;
+          else { const mm = q.match(/max-width\s*:\s*(\d+)/); if (mm) target = (+mm[1] >= 520) ? lib.main : lib.small; }
+          if (!target) continue;
+          it.block.forEach(r => { if (r.type === 'rule') addRule(target, sNormSel(r.selector), toDecls(r.decls), src); });
+        }
+      }
+    };
+    ingest(parseCSS(STRONG_CORE).items, null);
+    for (const h of heads) {
+      if (!pool.heads.has(h.id)) continue;
+      const { root } = parseHTML(h.html);
+      const css = [];
+      const walk = (list, inMso) => list.forEach(n => {
+        if (n.type === 'cc') { walk(n.children, inMso || (!n.revealed && isMsoCond(n.cond))); return; }
+        if (n.type !== 'element') return;
+        if (n.name === 'style' && !inMso) css.push(n.content || '');
+        else if (n.name === 'title' && norm(n.content)) lib.titles.push(norm(n.content));
+        else if (n.children) walk(n.children, inMso);
+      });
+      walk(unwrapHead(root.children).nodes, false);
+      ingest(parseCSS(css.join('\n')).items, h.id);
+      const comp = pool.heads.get(h.id);
+      if (comp.fontLinks.length) lib.linkSets.push({ links: comp.fontLinks, src: h.id });
+    }
+    return lib;
+  }
+
+  function composeStrong(lib, seed, opts) {
+    const rand = rng(seed);
+    const rnd = n => Math.floor(rand() * n);
+    const R = a => a[rnd(a.length)];
+    const chance = p => rand() < p;
+    const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const used = new Set();
+    const picks = [];
+    const fallbackFixes = [];
+    const fixFam = ([p, v]) => {
+      if (p !== 'font-family') return [p, v];
+      const imp = / !important$/.test(v); const val = v.replace(/ !important$/, '');
+      if (GENERIC.test(val) || /^(inherit|initial|unset)$/i.test(val)) return [p, v];
+      const serifish = /georgia|times|garamond|playfair|merriweather|lora|serif display|libre baskerville|cormorant|pt serif|noto serif|dm serif|palatino/i.test(val);
+      const have = familiesOf(val);
+      const add = (serifish ? ['Georgia', 'serif'] : ['Arial', 'Helvetica', 'sans-serif']).filter(f => !have.includes(lc(f)));
+      fallbackFixes.push(val);
+      return [p, val + ', ' + add.join(', ') + (imp ? ' !important' : '')];
+    };
+    const rank = sel => /^(\*|html|body)/.test(sel) ? 0 : /^(table|td|img|p|a|sup|sub|h\d|strong|u\s*\+|#Message)/i.test(sel) ? 1 : 2;
+    const pick = (group, map, isForced, prob) => {
+      const out = [];
+      map.forEach((props, sel) => {
+        if (!isForced(sel) && !chance(prob(sel))) return;
+        const decls = [];
+        props.forEach((vals, p) => {
+          const imp = vals.filter(x => /!important/.test(x.v));
+          const c = (imp.length && chance(0.75)) ? R(imp) : R(vals);
+          if (c.src) used.add(c.src);
+          decls.push(fixFam([p, c.v]));
+        });
+        out.push({ sel, decls });
+        picks.push({ slot: 'strong:' + group + ':' + sel, variant: hash(decls.map(d => d.join(':')).join(';')), source: null, sources: 1 });
+      });
+      return out;
+    };
+    const fmt = (rules, ind) => { ind = ind || ''; return rules.map(r => ind + r.sel.split(', ').join(',\n' + ind) + ' {\n' + r.decls.map(([p, v]) => ind + '  ' + p + ': ' + v + ';').join('\n') + '\n' + ind + '}').join('\n'); };
+
+    let base = pick('base', lib.base, s => STRONG_CORE_SEL.includes(s), s => /:hover/.test(s) ? 0.5 : 0.8);
+    base = [0, 1, 2].reduce((acc, k) => acc.concat(shuffle(base.filter(r => rank(r.sel) === k))), []);
+    const bpMain = R([599, 600, 620, 640, 680]), bpSmall = R([360, 414, 470, 480]);
+    let main = shuffle(pick('main', lib.main, s => /(^|\s|\.)(row|stack|hide|show|mobile_hide|desktop_hide|img)/.test(s), s => /\.row-\d+ \.column-\d+/.test(s) ? 0.2 : 0.7));
+    const small = pick('small', lib.small, () => false, () => 0.6);
+    const dark = pick('dark', lib.dark, s => /dark-img|light-img/.test(s), () => 0.85);
+    const builtins = ['msoSettings', 'msoCss'];
+    if (!main.length && !small.length) { main = BUILTIN.responsive[0].block.map(r => ({ sel: r.selector, decls: r.decls.map(d => [d.prop, d.value + (d.important ? ' !important' : '')]) })); builtins.push('responsive'); }
+    // web fonts are mandatory: @font-face pool first, then a font <link> set from a head, then a built-in link
+    let fontFaces = [], fontLinks = null;
+    if (lib.fonts.length) { fontFaces = lib.fonts; lib.fontSrc.forEach(x => x && used.add(x)); }
+    else if (lib.linkSets.length) { const ls = R(lib.linkSets); fontLinks = ls.links; used.add(ls.src); }
+    else { fontLinks = BUILTIN.fontLinks; builtins.push('fonts'); }
+    picks.push({ slot: 'strong:bp', variant: bpMain + '/' + bpSmall, source: null, sources: 1 });
+
+    const title = opts.includeTitle && lib.titles.length ? R(lib.titles) : '{{Email Subject}}';
+    picks.push({ slot: 'strong:title', variant: hash(title), source: null, sources: 1 });
+    const L = [];
+    L.push('<head>');
+    L.push('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">');
+    L.push('<meta charset="utf-8">');
+    const metas = shuffle([
+      '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+      '<meta name="x-apple-disable-message-reformatting">',
+      R(['<meta name="format-detection" content="telephone=no">', '<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">']),
+    ]);
+    L.push(...metas);
+    picks.push({ slot: 'strong:metas', variant: hash(metas.join('')), source: null, sources: 1 });
+    L.push('<!-- Dark mode support -->');
+    L.push('<meta name="color-scheme" content="light dark">');
+    L.push('<meta name="supported-color-schemes" content="light dark">');
+    L.push('<title>' + title.replace(/</g, '&lt;') + '</title>');
+    const o = shuffle(['<o:AllowPNG/>', '<o:PixelsPerInch>96</o:PixelsPerInch>']);
+    L.push('<!--[if mso]>');
+    L.push('<xml>');
+    if (chance(0.6)) L.push('<w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>');
+    L.push('<o:OfficeDocumentSettings>'); L.push(o[0]); L.push(o[1]); L.push('</o:OfficeDocumentSettings>');
+    L.push('</xml>');
+    L.push('<![endif]-->');
+    if (fontLinks) {
+      L.push('<!--[if !mso]><!-->');
+      fontLinks.forEach(a => L.push('<link' + attrStr(a) + '>'));
+      L.push('<!--<![endif]-->');
+    }
+    const reset = [];
+    if (fontFaces.length) reset.push(fontFaces.join('\n'));
+    reset.push(fmt(base));
+    const resp = [];
+    if (main.length) resp.push('@media only screen and (max-width: ' + bpMain + 'px) {\n' + fmt(main, '  ') + '\n}');
+    if (small.length) resp.push('@media only screen and (max-width: ' + bpSmall + 'px) {\n' + fmt(small, '  ') + '\n}');
+    const dm = [];
+    if (dark.length) {
+      dm.push(':root {\n  color-scheme: light dark;\n  supported-color-schemes: light dark;\n}');
+      dm.push('@media (prefers-color-scheme: dark) {\n' + fmt(dark, '  ') + '\n}');
+      dm.push(fmt(dark.map(r => ({ sel: r.sel.split(', ').map(x => '[data-ogsc] ' + x).join(', '), decls: r.decls }))));
+    }
+    const blocks = [{ c: 'Reset + client fixes', b: reset }, { c: 'Responsive', b: resp }, { c: 'Dark mode', b: dm }].filter(x => x.b.length);
+    const split = chance(0.5);
+    if (split) blocks.forEach(x => { L.push('<style>'); L.push('/* ' + x.c + ' */'); L.push(x.b.join('\n\n')); L.push('</style>'); });
+    else { L.push('<style>'); blocks.forEach((x, i) => { if (i) L.push(''); L.push('/* ' + x.c + ' */'); L.push(x.b.join('\n\n')); }); L.push('</style>'); }
+    const raise = R(['10%', '12%']);
+    L.push('<!--[if mso]>');
+    L.push('<style>');
+    const ms = ['table { border-collapse: collapse; }', 'table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }', 'sup, sub { font-size: 100% !important; }', 'sup { mso-text-raise: ' + raise + '; }', 'sub { mso-text-raise: -' + raise + '; }'];
+    ms.push('body, table, td, p, a, span { font-family: Arial, Helvetica, sans-serif !important; }');
+    if (chance(0.5)) ms.push('.nav-header { display: block !important; }');
+    L.push(...ms);
+    L.push('</style>');
+    L.push('<![endif]-->');
+    L.push('</head>');
+    picks.push({ slot: 'strong:extras', variant: [split, raise, o[0], ms.length].join('|'), source: null, sources: 1 });
+
+    const sources = [...used];
+    const prefix = '<!DOCTYPE html>\n<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">';
+    return { html: L.join('\n'), prefix, picks, builtins, sources, anchor: null, fallbackFixes, signature: hash(picks.map(p => p.slot + '=' + p.variant).sort().join('|')),
+      summary: { rules: base.length + main.length + small.length + dark.length, bp: bpMain } };
+  }
+
+  function slotLabel(slot) {
+    const [kind, ...rest] = slot.split(':');
+    const r = rest.join(':');
+    const map = { responsive: 'Responsive media queries', dark: 'Dark mode media queries', fonts: 'Web font set', msoSettings: 'Outlook MSO settings', title: 'Title' };
+    if (map[slot]) return map[slot];
+    if (kind === 'meta') return 'Meta ' + r.replace(/^(name|http-equiv|property):/, '');
+    if (kind === 'set') return ({ apple: 'Apple link fix', gmail: 'Gmail fix', samsung: 'Samsung fix', outlookcom: 'Outlook.com fixes', ogsc: 'Outlook.com dark rules', tpl: 'Template class rules' })[r] || r;
+    if (kind === 'css') return 'CSS ' + rest.slice(1).join(':');
+    if (kind === 'mso') return 'Outlook CSS ' + r;
+    if (kind === 'msoAt') return 'Outlook CSS @' + r;
+    if (kind === 'link') return 'Link ' + r.replace(/^https?:\/\//, '').slice(0, 40);
+    if (kind === 'cc') return 'Conditional [if ' + r.replace(/:r$/, '') + ']';
+    return slot;
+  }
+
+  function distance(aPicks, bMap) {
+    let diff = 0;
+    for (const p of aPicks) if (bMap[p.slot] !== p.variant) diff++;
+    for (const k in bMap) if (!aPicks.some(p => p.slot === k)) diff++;
+    return diff;
+  }
+
+  function generate(heads, history, opts, cache, fixedSeed) {
+    opts = { threshold: 0.25, includeTitle: true, minDiff: 2, xhtml: false, attempts: 120, ...opts };
+    const rev = hash(heads.map(h => h.id + ':' + h.updatedAt).join('|') + JSON.stringify([opts.threshold]));
+    let pool = cache && cache.get('__pool');
+    if (!pool || pool.rev !== rev) { pool = buildPool(heads, cache); pool.rev = rev; if (cache) cache.set('__pool', pool); }
+    const headNames = new Map(heads.map(h => [h.id, h.name]));
+    if (pool.headCount < 1) return { ok: false, reason: 'empty', message: 'Your library has no valid heads yet. Add at least two heads with different components, then generate.' };
+    const combos = combinationsLog10(pool, opts);
+    if (fixedSeed == null && (pool.headCount < 2 || combos < Math.log10(2))) {
+      return { ok: false, reason: 'insufficient', combos, message: pool.headCount < 2 ? 'Only one valid head is saved. Generation combines components from different heads, so add at least one more head with different meta, CSS or Outlook blocks.' : 'Every saved head offers the same components, so there is only one possible combination. Add heads that differ in their responsive rules, dark mode, fonts, client fixes or Outlook CSS.' };
+    }
+    const prev = history.map(h => h.pickMap || {});
+    const savedHashes = new Set(heads.map(h => hash(norm(h.html))));
+    const validate = res => {
+      const v = validateHead(res.html);
+      const bad = /<script|<body|<html|<!doctype/i.test(res.html);
+      return v.ok && !bad ? null : (v.errors[0] ? v.errors[0].msg : 'forbidden tag');
+    };
+    const strong = opts.mixMode === 'strong';
+    let slib = null;
+    if (strong) {
+      slib = cache && cache.get('__strong');
+      if (!slib || slib.rev !== rev) { slib = buildStrongLib(heads, pool); slib.rev = rev; if (cache) cache.set('__strong', slib); }
+    }
+    const make = seed => strong ? composeStrong(slib, seed, opts) : compose(pool, seed, opts, headNames);
+    if (fixedSeed != null) {
+      const res = make(fixedSeed >>> 0);
+      const bad = validate(res);
+      if (bad) return { ok: false, reason: 'invalid', message: 'The combination for this seed failed validation (' + bad + ').' };
+      return finish(res, fixedSeed >>> 0, true);
+    }
+    let best = null;
+    const why = { invalid: 0, invalidMsg: '', missing: new Map(), similar: 0 };
+    const base = (Date.now() ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
+    for (let a = 0; a < opts.attempts; a++) {
+      const seed = (base + a * 2654435761) >>> 0;
+      const res = make(seed);
+      const bad = validate(res);
+      if (bad) { why.invalid++; if (!why.invalidMsg) why.invalidMsg = bad; continue; }
+      if (strong) {
+        const f = detectFeatures(res.html);
+        const miss = FEATURES.filter(x => !f[x.id]);
+        if (miss.length) { miss.forEach(x => why.missing.set(x.name, (why.missing.get(x.name) || 0) + 1)); continue; }
+      }
+      if (savedHashes.has(hash(norm(res.html)))) { why.similar++; continue; }
+      why.similar++;
+      let minD = Infinity;
+      for (const m of prev) { const d = distance(res.picks, m); if (d < minD) minD = d; if (minD < opts.minDiff) break; }
+      if (minD >= opts.minDiff) return finish(res, seed, false, minD);
+      if (!best || minD > best.minD) best = { res, seed, minD };
+    }
+    if (!why.similar) {
+      if (why.invalid >= why.missing.size && why.invalid) return { ok: false, reason: 'invalid', combos, message: 'Every attempt produced code that failed the safety check (' + why.invalidMsg + '). One of the selected heads probably contains CSS the mixer can’t combine. Try mixing without your newest heads to find it.' };
+      const top = [...why.missing.entries()].sort((a, b) => b[1] - a[1])[0];
+      return { ok: false, reason: 'features', combos, message: 'Every attempt was missing a required email feature (' + (top ? top[0] : 'unknown') + '). Try Normal mix, or add a head that includes it.' };
+    }
+    return { ok: false, reason: 'exhausted', combos, best: best ? best.minD : 0, message: 'No new combination differs from your previous ' + history.length + ' generations by at least ' + opts.minDiff + ' component' + (opts.minDiff === 1 ? '' : 's') + '. The library offers roughly ' + fmtCombos(combos) + ' combinations. Add heads with different components, lower the minimum difference in Settings, or clear old generations.' };
+
+    function finish(res, seed, fixed, minD) {
+      const pickMap = {}; res.picks.forEach(p => { pickMap[p.slot] = p.variant; });
+      const features = detectFeatures(res.html);
+      res.html = (res.prefix || pickDoctype(heads)) + '\n' + res.html;
+      const shown = strong ? res.picks.filter(p => !/^strong:(base|main|small|dark):/.test(p.slot)).concat([{ slot: 'strong:rules', variant: String(res.summary.rules), source: null, sources: 1 }]) : res.picks;
+      const components = shown.map(p => ({ slot: p.slot, label: slotLabel(p.slot), source: p.source, sourceName: headNames.get(p.source) || p.source, sharedBy: p.sources, variant: p.variant, dep: p.dep || null }));
+      return { ok: true, mixMode: strong ? 'strong' : 'normal', html: res.html, seed, fixed, signature: res.signature, pickMap, components, builtins: res.builtins, sources: res.sources, sourceNames: res.sources.map(id => headNames.get(id) || id), features, combos, minDistance: minD === Infinity || minD == null ? null : minD, fallbackFixes: res.fallbackFixes, anchorName: res.anchor ? headNames.get(res.anchor) : null };
+    }
+  }
+  function estimate(heads, opts, cache) {
+    opts = { threshold: 0.25, includeTitle: true, ...opts };
+    const rev = hash(heads.map(h => h.id + ':' + h.updatedAt).join('|') + JSON.stringify([opts.threshold]));
+    let pool = cache && cache.get('__pool');
+    if (!pool || pool.rev !== rev) { pool = buildPool(heads, cache); pool.rev = rev; if (cache) cache.set('__pool', pool); }
+    return { headCount: pool.headCount, combos: pool.headCount >= 2 ? combinationsLog10(pool, opts) : 0 };
+  }
+  function pickDoctype(heads) {
+    const counts = new Map();
+    for (const h of heads) {
+      const d = h.doctype && /^<!doctype\s[^<>]*>$/i.test(h.doctype) ? norm(h.doctype) : null;
+      if (d) counts.set(d, (counts.get(d) || 0) + 1);
+    }
+    let best = '<!DOCTYPE html>', n = 0;
+    for (const [d, c] of counts) if (c > n) { best = d; n = c; }
+    return best;
+  }
+  function fmtCombos(lg) {
+    if (lg < 6) return Math.round(Math.pow(10, lg)).toLocaleString('en-US');
+    const v = Math.pow(10, lg);
+    if (lg < 9) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + ' million';
+    if (lg < 12) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + ' billion';
+    const sup = String(Math.floor(lg)).replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+    return 'over 10' + sup;
+  }
+
+  return { cleanHead, estimate, hash, parseHTML, parseCSS, validateHead, formatHead, extractHead, extractComponents, detectFeatures, buildPool, generate, combinationsLog10, fmtCombos, FEATURES, slotLabel, serialize, selCategory };
+})();
+if (typeof module !== 'undefined') module.exports = Engine;
+
+</script>
+<script>
+window.__EXAMPLES__ = [{"name": "Newsletter base", "html": "<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no,address=no,email=no,date=no,url=no\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark\">\n<title>Monthly newsletter<\/title>\n<!--[if mso]>\n<noscript><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96<\/o:PixelsPerInch><\/o:OfficeDocumentSettings><\/xml><\/noscript>\n<![endif]-->\n<!--[if !mso]><!-->\n<link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n<!--<![endif]-->\n<style>\n:root { color-scheme: light dark; supported-color-schemes: light dark; }\nhtml, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }\n* { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }\ntable, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; }\nimg { -ms-interpolation-mode: bicubic; border: 0; }\na[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }\nu + #body a { color: inherit; text-decoration: none; }\n#MessageViewBody a { color: inherit; text-decoration: none; }\n.wrapper { font-family: 'Poppins', Arial, sans-serif; }\n@media only screen and (max-width: 600px) {\n  .wrapper { width: 100% !important; }\n  .stack { display: block !important; width: 100% !important; }\n}\n@media (prefers-color-scheme: dark) {\n  .wrapper { background-color: #111 !important; }\n  .text { color: #eee !important; }\n}\n[data-ogsc] .text { color: #eee !important; }\n[data-ogsb] .wrapper { background-color: #111 !important; }\n<\/style>\n<!--[if mso]>\n<style>\ntable { border-collapse: collapse; }\nbody, table, td, a { font-family: Arial, sans-serif !important; }\n<\/style>\n<![endif]-->\n<\/head>"}, {"name": "Promo v2", "html": "<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no\">\n<meta name=\"format-detection\" content=\"date=no\">\n<!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><\/o:OfficeDocumentSettings><\/xml><![endif]-->\n<style type=\"text/css\">\n@import url('https://fonts.googleapis.com/css?family=Lato:400,700');\nbody { margin: 0; padding: 0; word-spacing: normal; }\nimg { border: 0; display: block; outline: none; }\ntable, td { border-collapse: collapse; }\na[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; }\nu + .body a { color: inherit; }\n.promo-box { font-family: Lato, Helvetica; padding: 20px; }\n@media screen and (max-width: 480px) {\n  .promo-box { padding: 10px !important; }\n  .hide-mobile { display: none !important; }\n}\n@media (prefers-color-scheme: dark) {\n  .promo-box { background: #222 !important; color: #fff !important; }\n}\n<\/style>\n<!--[if mso]><style>td { mso-line-height-rule: exactly; } table { border-collapse: collapse; border-spacing: 0; }<\/style><![endif]-->"}, {"name": "Transactional", "html": "<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark only\">\n<style>\nbody { margin: 0 !important; padding: 0 !important; -webkit-font-smoothing: antialiased; }\nimg { -ms-interpolation-mode: bicubic; }\n#MessageWebViewDiv a { color: inherit; }\n.ExternalClass { width: 100%; }\n@media only screen and (max-width: 620px) {\n  .container { width: 100% !important; }\n}\n@media (prefers-color-scheme: dark) {\n  .container { background: #000 !important; }\n}\n[data-ogsb] .container { background: #000 !important; }\n<\/style>\n<\/head>"}];
+</script>
+<script>
+(() => {
+  'use strict';
+  const E = Engine;
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtDate = ts => new Date(ts).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const rel = ts => {
+    const d = (Date.now() - ts) / 1000;
+    if (d < 45) return 'just now';
+    if (d < 3600) return Math.round(d / 60) + ' min ago';
+    if (d < 86400) return Math.round(d / 3600) + ' h ago';
+    if (d < 86400 * 30) return Math.round(d / 86400) + ' d ago';
+    return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  let lastStamp = 0;
+  const stamp = () => { const n = Math.max(Date.now(), lastStamp + 1); lastStamp = n; return n; };
+  const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout', message: 'Timed out' }), ms))]);
+  const plural = (n, w) => n.toLocaleString('en-US') + ' ' + w + (n === 1 ? '' : 's');
+
+  const ICON = {
+    dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+    lib: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/><path d="m18 16 2 2-2 2"/></svg>',
+    gen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>',
+    set: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/></svg>',
+    dup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+    del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>',
+    redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>',
+    save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7M8 20v-6h8v6"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    yes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+    no: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8M7 13l5-5 5 5M5 4h14"/></svg>',
+  };
+
+  /* ================= storage ================= */
+  const IDB = {
+    db: null,
+    open() {
+      return new Promise((res, rej) => {
+        if (!window.indexedDB) return rej(new Error('IndexedDB unavailable'));
+        const r = indexedDB.open('envelope-head-library', 1);
+        r.onupgradeneeded = () => { const d = r.result; ['heads', 'gens', 'kv'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: n === 'kv' ? 'k' : 'id' }); }); };
+        r.onsuccess = () => { this.db = r.result; res(); };
+        r.onerror = () => rej(r.error);
+      });
+    },
+    req(store, mode, fn) {
+      return new Promise((res, rej) => { const q = fn(this.db.transaction(store, mode).objectStore(store)); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+    },
+    all(s) { return this.req(s, 'readonly', o => o.getAll()); },
+    put(s, v) { return this.req(s, 'readwrite', o => o.put(v)); },
+    del(s, k) { return this.req(s, 'readwrite', o => o.delete(k)); },
+    get(s, k) { return this.req(s, 'readonly', o => o.get(k)); },
+  };
+  const DEFAULTS = { minDiff: 2, threshold: 0.25, includeTitle: true, xhtml: false, theme: 'dark', mixMode: 'normal', mixSource: 'all', picked: [] };
+  const errText = e => {
+    const c = e && e.code;
+    if (c === 'quota_exceeded') return 'Storage is full. Delete some heads or generations to make room.';
+    if (c === 'resource_exhausted') return 'Too many requests at once. Wait a moment and try again.';
+    if (c === 'revoked' || c === 'not_granted') return 'Storage access is no longer available in this view.';
+    if (c === 'timeout') return 'Storage did not answer in time. Check your connection and try again.';
+    return (e && e.message) || 'Storage error.';
+  };
+  function packGen(g) {
+    const { pickMap, unsaved, ...rest } = g;
+    return JSON.parse(JSON.stringify({ ...rest, pickList: Object.entries(pickMap || {}).map(([k, v]) => k + '\t' + v) }));
+  }
+  function unpackGen(g) {
+    const pickMap = {};
+    (g.pickList || []).forEach(x => { const i = x.lastIndexOf('\t'); if (i > 0) pickMap[x.slice(0, i)] = x.slice(i + 1); });
+    const { pickList, ...rest } = g;
+    return { ...rest, pickMap: g.pickMap || pickMap };
+  }
+  const Store = {
+    mode: 'memory', note: '', heads: [], gens: [], settings: { ...DEFAULTS },
+    async init() {
+      let db = null, uid = null;
+      if (window.claude && typeof window.claude.use === 'function') {
+        try {
+          const [d, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+          db = d; uid = user ? await user.id() : null;
+        } catch (e) { db = null; }
+      }
+      if (db && uid) {
+        try {
+          this.db = db;
+          this.base = db.doc('data/users/' + uid + '/lib');
+          this.setRef = db.doc('data/users/' + uid + '/settings');
+          const [h, g, s] = await Promise.all([this.loadAll('heads'), this.loadAll('gens'), withTimeout(this.setRef.get(), 15000)]);
+          this.heads = h; this.gens = g.map(unpackGen);
+          if (s.exists) this.settings = { ...DEFAULTS, ...s.data() };
+          this.mode = 'cloud';
+          return;
+        } catch (e) { this.note = 'Your account storage could not be read (' + errText(e) + '). Using this browser’s storage instead.'; }
+      }
+      try {
+        await IDB.open();
+        this.heads = await IDB.all('heads');
+        this.gens = (await IDB.all('gens')).map(unpackGen);
+        const s = await IDB.get('kv', 'settings');
+        if (s) this.settings = { ...DEFAULTS, ...s.v };
+        this.mode = 'local';
+      } catch (e) {
+        this.mode = 'memory';
+        this.note = 'No persistent storage is available here. Changes will be lost when the page reloads; export a backup from Settings.';
+      }
+    },
+    async loadAll(kind) {
+      const col = this.base.collection(kind);
+      const out = [], seen = new Set();
+      let last = null;
+      for (let guard = 0; guard < 400; guard++) {
+        let q;
+        try {
+          q = last === null ? col.orderBy('updatedAt', 'desc').limit(500) : col.where('updatedAt', '<', last).orderBy('updatedAt', 'desc').limit(500);
+        } catch (e) { q = col; }
+        const snap = await withTimeout(q.get(), 20000);
+        let added = 0;
+        for (const d of snap.docs) { if (!seen.has(d.id)) { seen.add(d.id); out.push(JSON.parse(JSON.stringify(d.data()))); added++; } }
+        if (q === col || snap.size < 500 || !added) break;
+        last = snap.docs[snap.docs.length - 1].data().updatedAt;
+      }
+      return out;
+    },
+    async retry(fn) {
+      for (let a = 0; ; a++) {
+        try { return await withTimeout(fn(), 20000); }
+        catch (e) {
+          const c = e && e.code;
+          if (a < 1 && c === 'unavailable') { await sleep(300 + Math.random() * 500); continue; }
+          if (a < 4 && c === 'resource_exhausted') { await sleep(1200 * (a + 1)); continue; }
+          throw e;
+        }
+      }
+    },
+    async put(kind, obj) {
+      if (kind === 'gens') obj = packGen(obj);
+      if (this.mode === 'cloud') return this.retry(() => this.base.collection(kind).doc(obj.id).set(obj));
+      if (this.mode === 'local') return IDB.put(kind, obj);
+    },
+    async del(kind, id) {
+      if (this.mode === 'cloud') return this.retry(() => this.base.collection(kind).doc(id).delete());
+      if (this.mode === 'local') return IDB.del(kind, id);
+    },
+    async saveSettings() {
+      if (this.mode === 'cloud') return this.retry(() => this.setRef.set({ ...this.settings }));
+      if (this.mode === 'local') return IDB.put('kv', { k: 'settings', v: this.settings });
+    },
+  };
+
+  /* ================= syntax highlighting ================= */
+  function tagEnd(src, i) {
+    let q = null;
+    for (; i < src.length; i++) { const c = src[i]; if (q) { if (c === q) q = null; } else if (c === '"' || c === "'") q = c; else if (c === '>') return i; }
+    return -1;
+  }
+  const sp = (c, t) => '<span class="t-' + c + '">' + esc(t) + '</span>';
+  function hlTag(tag) {
+    const m = /^(<\/?)([a-zA-Z][\w:.\-]*)([\s\S]*?)(\/?>)?$/.exec(tag);
+    if (!m) return esc(tag);
+    let rest = m[3].replace(/([^\s=\/>"']+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"'>]+)?|([\s\S])/g, (all, n, eq, v, other) => {
+      if (other !== undefined) return esc(other);
+      return sp('attr', n) + (eq ? sp('p', eq) : '') + (v ? sp('str', v) : '');
+    });
+    return sp('p', m[1]) + sp('tag', m[2]) + rest + (m[4] ? sp('p', m[4]) : '');
+  }
+  function hlCSS(css) {
+    const re = /(\/\*[\s\S]*?(?:\*\/|$))|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?)|([{}])|(;)|(:)|(@[\w-]+)|(!\s*important)|([^\/"'{};:@!]+|[\/!])/gi;
+    const stack = ['sel'];
+    let state = 'prop', pre = '', atFlag = false, out = '', m;
+    while ((m = re.exec(css))) {
+      const top = stack[stack.length - 1];
+      if (m[1]) { out += sp('com', m[1]); continue; }
+      if (m[2]) { out += sp('str', m[2]); pre += m[2]; continue; }
+      if (m[3] === '{') {
+        const isAt = /^\s*@/.test(pre);
+        const declAt = /^\s*@(font-face|page|viewport|-ms-viewport)/i.test(pre);
+        stack.push(isAt && !declAt ? 'sel' : 'decl'); state = 'prop'; pre = ''; atFlag = false;
+        out += sp('p', '{'); continue;
+      }
+      if (m[3] === '}') { if (stack.length > 1) stack.pop(); state = 'prop'; pre = ''; atFlag = false; out += sp('p', '}'); continue; }
+      if (m[4]) { if (top === 'decl') state = 'prop'; pre = ''; atFlag = false; out += sp('p', ';'); continue; }
+      if (m[5]) { if (top === 'decl' && state === 'prop') { state = 'val'; out += sp('p', ':'); } else { pre += ':'; out += sp(atFlag ? 'val' : 'sel', ':'); } continue; }
+      if (m[6]) { out += sp('at', m[6]); pre += m[6]; atFlag = true; continue; }
+      if (m[7]) { out += sp('imp', m[7]); continue; }
+      const t = m[8];
+      if (top === 'decl') out += sp(state === 'prop' ? 'prop' : 'val', t);
+      else { out += /^\s+$/.test(t) ? t : sp(atFlag ? 'val' : 'sel', t); pre += t; }
+    }
+    return out;
+  }
+  function highlight(src) {
+    let out = '', i = 0;
+    const n = src.length;
+    while (i < n) {
+      if (src.startsWith('<!--', i)) {
+        const h = src.slice(i, i + 240);
+        let m = /^<!--\[if[^\]]*\]>(<!-->)?/i.exec(h);
+        if (m) { out += sp('cc', m[0]); i += m[0].length; continue; }
+        m = /^<!--\s*<!\[endif\]\s*-->/i.exec(h);
+        if (m) { out += sp('cc', m[0]); i += m[0].length; continue; }
+        const e = src.indexOf('-->', i + 4);
+        const end = e < 0 ? n : e + 3;
+        out += sp('com', src.slice(i, end)); i = end; continue;
+      }
+      const ce = /^<!\[endif\]\s*-->/i.exec(src.slice(i, i + 20));
+      if (ce) { out += sp('cc', ce[0]); i += ce[0].length; continue; }
+      if (src[i] === '<' && /[\/a-zA-Z!]/.test(src[i + 1] || '')) {
+        const e = tagEnd(src, i);
+        const end = e < 0 ? n : e + 1;
+        const tag = src.slice(i, end);
+        out += src[i + 1] === '!' ? sp('com', tag) : hlTag(tag);
+        i = end;
+        const nm = /^<(style)\b/i.exec(tag);
+        if (nm && !/\/>$/.test(tag)) {
+          const rest = src.slice(i);
+          const cm = /<\/\s*style\s*>/i.exec(rest);
+          const cend = cm ? i + cm.index : n;
+          out += hlCSS(src.slice(i, cend)); i = cend;
+        }
+        continue;
+      }
+      let e = src.indexOf('<', i + 1);
+      if (e < 0) e = n;
+      out += esc(src.slice(i, e)); i = e;
+    }
+    return out;
+  }
+
+  /* ================= code editor ================= */
+  class CodeEditor {
+    constructor(host, { readOnly = false, value = '', onChange = null, placeholder = '', label = 'Code' } = {}) {
+      this.onChange = onChange;
+      host.innerHTML = '<div class="ed"><div class="ed-gutter" aria-hidden="true"><pre></pre></div><div class="ed-body"><pre aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off"></textarea></div></div>';
+      this.root = host.firstChild;
+      this.gutter = $('.ed-gutter pre', this.root);
+      this.pre = $('.ed-body pre', this.root);
+      this.ta = $('textarea', this.root);
+      this.ta.setAttribute('aria-label', label);
+      if (placeholder) this.ta.placeholder = placeholder;
+      this.ta.readOnly = readOnly;
+      this.bad = new Set();
+      this.escapeTab = false;
+      this.ta.addEventListener('input', () => { this.render(); this.onChange && this.onChange(this.ta.value); });
+      this.ta.addEventListener('scroll', () => this.sync());
+      this.ta.addEventListener('keydown', e => this.key(e));
+      this.setValue(value);
+    }
+    key(e) {
+      this.escCount = e.key === 'Escape' ? (this.escCount || 0) + 1 : 0;
+      if (e.key === 'Escape') { this.escapeTab = true; return; }
+      if (e.key === 'Tab' && !this.ta.readOnly && !this.escapeTab && !e.shiftKey) {
+        e.preventDefault();
+        const { selectionStart: s, selectionEnd: en, value: v } = this.ta;
+        this.ta.value = v.slice(0, s) + '  ' + v.slice(en);
+        this.ta.selectionStart = this.ta.selectionEnd = s + 2;
+        this.render(); this.onChange && this.onChange(this.ta.value);
+        return;
+      }
+      if (e.key !== 'Tab') this.escapeTab = false;
+    }
+    setValue(v) { this.ta.value = v || ''; this.render(); this.ta.scrollTop = 0; this.ta.scrollLeft = 0; this.sync(); }
+    getValue() { return this.ta.value; }
+    setBad(lines) { this.bad = new Set(lines); this.renderGutter(); }
+    renderGutter() {
+      const count = this.ta.value.split('\n').length;
+      let g = '';
+      for (let k = 1; k <= count; k++) g += (this.bad.has(k) ? '<span class="bad">' + k + '</span>' : k) + '\n';
+      this.gutter.innerHTML = g;
+    }
+    render() {
+      const v = this.ta.value;
+      this.pre.innerHTML = highlight(v) + (v.endsWith('\n') || !v ? ' \n' : '\n');
+      this.renderGutter();
+      this.sync();
+    }
+    sync() {
+      this.pre.scrollTop = this.ta.scrollTop; this.pre.scrollLeft = this.ta.scrollLeft;
+      this.gutter.style.transform = 'translateY(' + -this.ta.scrollTop + 'px)';
+    }
+    goLine(line) {
+      const lines = this.ta.value.split('\n');
+      let pos = 0;
+      for (let k = 0; k < line - 1 && k < lines.length; k++) pos += lines[k].length + 1;
+      this.ta.focus();
+      this.ta.setSelectionRange(pos, pos + (lines[line - 1] || '').length);
+      const lh = parseFloat(getComputedStyle(this.ta).lineHeight) || 21;
+      this.ta.scrollTop = Math.max(0, (line - 4) * lh);
+      this.sync();
+    }
+  }
+
+  /* ================= feedback ================= */
+  function toast(msg, kind = '') {
+    const t = document.createElement('div');
+    t.className = 'toast ' + kind;
+    t.textContent = msg;
+    const box = $('#toasts');
+    box.appendChild(t);
+    while (box.children.length > 3) box.firstChild.remove();
+    setTimeout(() => t.remove(), kind === 'err' ? 6500 : 3200);
+  }
+  function confirmDialog({ title, body, ok = 'Confirm', danger = false, list = null, cancel = 'Cancel' }) {
+    return new Promise(res => {
+      const d = $('#dlg');
+      d.innerHTML = '<form method="dialog"><div class="dl-b"><h2>' + esc(title) + '</h2><p>' + esc(body) + '</p>' + (list ? '<ul class="dl-list">' + list.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '</div><div class="btns">' + (cancel ? '<button class="btn" value="cancel">' + esc(cancel) + '</button>' : '') + '<button class="btn ' + (danger ? 'danger solid' : 'primary') + '" value="ok">' + esc(ok) + '</button></div></form>';
+      d.onclose = () => res(d.returnValue === 'ok');
+      d.returnValue = '';
+      d.showModal();
+      const b = $('button[value="' + (danger ? 'cancel' : 'ok') + '"]', d) || $('button', d);
+      b && b.focus();
+    });
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (x) { ok = false; }
+      ta.remove(); return ok;
+    }
+  }
+  let downloadsNs;
+  async function saveFile(filename, data) {
+    if (downloadsNs === undefined) downloadsNs = (window.claude && typeof claude.use === 'function') ? await claude.use('downloads').catch(() => null) : null;
+    if (downloadsNs) {
+      try { await downloadsNs.save({ filename, data }); toast('Downloaded ' + filename, 'ok'); }
+      catch (e) { if (e && e.code === 'declined') toast('Download cancelled.'); else toast('Download failed: ' + ((e && e.message) || 'unknown error'), 'err'); }
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([data], { type: /\.json$/.test(filename) ? 'application/json' : 'text/html' }));
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  /* ================= state ================= */
+  ICON.heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+  ICON.heartOn = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+  ICON.eye = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+  const cache = new Map();
+  const S = {
+    current: null, notice: null, generating: false,
+    fav: { tab: 'all', q: '', open: null },
+    mine: { q: '', page: 0 },
+  };
+  const PAGE = 30;
+  const DEFAULT_DOCTYPE = '<!DOCTYPE html>';
+  const liked = () => Store.gens.filter(g => g.liked && g.html);
+  const normText = s => String(s || '').replace(/\s+/g, ' ').trim();
+  const contentHash = html => E.hash(normText(html));
+  const genName = g => 'Generated head, ' + fmtDate(g.createdAt);
+
+  /* ---- which heads go into the mix ---- */
+  const genHeadCache = new Map();
+  function genAsHead(g) {
+    let h = genHeadCache.get(g.id);
+    if (!h) {
+      const c = E.cleanHead(g.html);
+      h = { id: g.id, name: genName(g), html: c.html, doctype: c.doctype, updatedAt: g.createdAt, fromGen: true };
+      genHeadCache.set(g.id, h);
+    }
+    return h;
+  }
+  const picked = () => new Set(Store.settings.picked || []);
+  function mixSources() {
+    if ((Store.settings.mixSource || 'all') !== 'pick') return Store.heads;
+    const sel = picked();
+    return Store.heads.filter(h => sel.has(h.id)).concat(liked().filter(g => sel.has(g.id)).map(genAsHead));
+  }
+  let pickSaveT;
+  function savePicks() {
+    clearTimeout(pickSaveT);
+    pickSaveT = setTimeout(() => Store.saveSettings().catch(e => toast('Could not save your selection: ' + errText(e), 'err')), 500);
+  }
+  function setPicked(set) {
+    const validIds = new Set(Store.heads.map(h => h.id).concat(liked().map(g => g.id)));
+    Store.settings.picked = [...set].filter(id => validIds.has(id));
+    savePicks();
+    updatePickState();
+  }
+  let pickQ = '';
+  function pickCandidates() {
+    const q = pickQ.trim().toLowerCase();
+    const gens = liked().sort((a, b) => b.createdAt - a.createdAt).map(g => ({ id: g.id, name: genName(g), kind: 'gen', liked: true }));
+    const heads = Store.heads.slice().sort((a, b) => (b.liked ? 1 : 0) - (a.liked ? 1 : 0) || b.updatedAt - a.updatedAt).map(h => ({ id: h.id, name: h.name, kind: 'head', liked: !!h.liked }));
+    const f = x => !q || x.name.toLowerCase().includes(q);
+    return { gens: gens.filter(f), heads: heads.filter(f) };
+  }
+  function renderPickList() {
+    const host = $('#pick-list');
+    if (!host) return;
+    const sel = picked();
+    const { gens, heads } = pickCandidates();
+    const row = x => `<label class="pick-row"><input type="checkbox" data-pick="${esc(x.id)}" ${sel.has(x.id) ? 'checked' : ''}><span class="pn">${esc(x.name)}</span>${x.liked ? `<span class="pk heart on" title="Liked">${ICON.heartOn}</span>` : ''}</label>`;
+    const LIMIT = 300;
+    const group = (title, list) => list.length ? `<div class="pick-group"><h4>${title} <span>${list.length}</span></h4>${list.slice(0, LIMIT).map(row).join('')}${list.length > LIMIT ? `<p class="hint">Showing ${LIMIT} of ${list.length}. Search to find others.</p>` : ''}</div>` : '';
+    host.innerHTML = (group('Liked generated heads', gens) + group('My heads', heads)) || '<p class="hint" style="padding:12px">Nothing matches your search.</p>';
+  }
+  function updatePickState() {
+    const n = mixSources().length;
+    const c = $('#pick-count');
+    if (c) c.textContent = (Store.settings.mixSource === 'pick' ? n + ' selected' : 'All ' + plural(Store.heads.length, 'head'));
+    const gb = $('#v-generate .airmail');
+    if (gb && !S.generating) gb.disabled = n < 2;
+    const warn = $('#pick-warn');
+    if (warn) warn.hidden = n >= 2;
+  }
+
+  /* ================= router ================= */
+  const VIEWS = ['generate', 'favorites', 'add', 'preferences'];
+  function route() {
+    if (sheetEd) closeSheet(false);
+    const h = location.hash.replace(/^#/, '');
+    const v = VIEWS.includes(h) ? h : 'generate';
+    $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.view === v ? 'page' : 'false'));
+    $$('section.view').forEach(s => { s.hidden = s.id !== 'v-' + v; });
+    S.view = v;
+    render();
+    window.scrollTo(0, 0);
+  }
+  function render() {
+    $('#c-fav').textContent = (liked().length + Store.heads.filter(h => h.liked).length).toLocaleString('en-US');
+    $('#c-heads').textContent = Store.heads.length.toLocaleString('en-US');
+    ({ generate: renderGenerate, favorites: renderFavorites, add: renderAdd, preferences: renderSettings })[S.view]();
+  }
+
+  /* ================= adding heads ================= */
+  function suggestName(html) {
+    const t = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+    let base = t ? normText(t[1].replace(/<[^>]*>/g, '')).slice(0, 60) : '';
+    if (!base || /^[{\[*%$#|]/.test(base)) {
+      let n = Store.heads.length + 1;
+      while (Store.heads.some(h => h.name === 'Email head ' + n)) n++;
+      return 'Email head ' + n;
+    }
+    let name = base, k = 2;
+    while (Store.heads.some(h => h.name === name)) name = base + ' (' + k++ + ')';
+    return name;
+  }
+  // Returns {ok, rec?, message}
+  async function addOne(rawHtml, rawName) {
+    const c = E.cleanHead(rawHtml);
+    if (c.empty) return { ok: false, message: 'No head was found. Paste the whole email or its <head> part; it needs at least one meta, style or link tag.' };
+    if (!c.ok) return { ok: false, message: 'This head has a mistake we could not fix automatically: ' + (c.errors[0] ? 'line ' + c.errors[0].line + ', ' + c.errors[0].msg : 'unreadable code') };
+    const h = contentHash(c.html);
+    const dup = Store.heads.find(x => contentHash(x.html) === h);
+    if (dup) return { ok: false, duplicate: true, message: 'This head is already saved as “' + dup.name + '”.' };
+    const now = stamp();
+    const rec = { id: newId('h_'), name: (rawName || '').trim().slice(0, 160) || suggestName(c.html), html: c.html, doctype: c.doctype || null, liked: false, createdAt: now, updatedAt: now };
+    await Store.put('heads', rec);
+    Store.heads.push(rec);
+    return { ok: true, rec, removed: c.removed };
+  }
+  let addEd = null;
+  async function addFromBox() {
+    const html = addEd.getValue();
+    if (!html.trim()) { toast('Paste an email or a head first.', 'err'); addEd.ta.focus(); return; }
+    const btn = $('#add-btn'); btn.disabled = true;
+    try {
+      const r = await addOne(html, $('#add-name').value);
+      if (!r.ok) { showAddMsg(r.message, 'err'); return; }
+      addEd.setValue(''); $('#add-name').value = '';
+      showAddMsg('Saved as “' + r.rec.name + '”.' + (r.removed.length ? ' Removed ' + r.removed.join(', ') + '.' : ''), 'ok');
+      S.mine.page = 0;
+      render();
+    } catch (e) { showAddMsg('Could not save: ' + errText(e), 'err'); }
+    finally { btn.disabled = false; }
+  }
+  function showAddMsg(text, kind) {
+    const m = $('#add-msg');
+    if (!m) { toast(text, kind); return; }
+    m.className = 'add-msg ' + kind; m.textContent = text; m.hidden = false;
+  }
+  async function addFiles(files) {
+    if (!files.length) return;
+    let ok = 0; const bad = [];
+    for (const f of files) {
+      const name = f.name.replace(/\.(html?|txt)$/i, '');
+      try {
+        const r = await addOne(await f.text(), name);
+        if (r.ok) ok++; else bad.push(name + ': ' + r.message);
+      } catch (e) { bad.push(name + ': ' + errText(e)); if (e && e.code === 'quota_exceeded') break; }
+      if (ok && ok % 25 === 0) toast('Added ' + ok + ' of ' + files.length + '…');
+    }
+    render();
+    if (bad.length) await confirmDialog({ title: plural(ok, 'head') + ' added', body: plural(bad.length, 'file') + ' were skipped:', list: bad.slice(0, 60), ok: 'OK', cancel: null });
+    else toast('Added ' + plural(ok, 'head'), 'ok');
+  }
+
+  /* ================= add page ================= */
+  function renderAdd() {
+    const el = $('#v-add');
+    if (!el.dataset.built) {
+      el.dataset.built = '1';
+      el.innerHTML = `
+        <div class="view-head"><div><h1>Add heads</h1><p>Paste a whole email or just its head. We keep only the head part and name it for you.</p></div></div>
+        <div class="panel add-card">
+          <div class="add-ed" id="add-ed"></div>
+          <div class="add-row">
+            <input class="input" id="add-name" placeholder="Name (optional)" aria-label="Name (optional)" maxlength="160">
+            <button class="btn primary big" id="add-btn" data-act="add">${ICON.plus}Save head</button>
+            <label class="btn big">${ICON.up}Add from files<input type="file" id="add-files" multiple accept=".html,.htm,.txt" class="sr"></label>
+          </div>
+          <p class="add-msg" id="add-msg" role="status" hidden></p>
+        </div>
+        <div class="mine-head"><h2>Your heads <span class="muted" id="mine-count"></span></h2>
+          <div class="search">${ICON.search}<input class="input" id="mine-q" type="search" placeholder="Search your heads" aria-label="Search your heads"></div></div>
+        <div id="mine-list"></div>`;
+      addEd = new CodeEditor($('#add-ed'), { label: 'Email or head HTML', placeholder: 'Paste your email HTML here…' });
+      $('#add-files').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+      let t;
+      $('#mine-q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { S.mine.q = e.target.value; S.mine.page = 0; renderMine(); }, 140); });
+    }
+    renderMine();
+  }
+  function renderMine() {
+    const host = $('#mine-list');
+    $('#mine-count').textContent = Store.heads.length ? '(' + Store.heads.length.toLocaleString('en-US') + ')' : '';
+    if (!Store.heads.length) {
+      host.innerHTML = `<div class="panel empty"><h3>No heads yet</h3><p>Paste an email above, or try the generator with three example heads.</p><button class="btn" data-act="examples">Add 3 example heads</button></div>`;
+      return;
+    }
+    const q = S.mine.q.trim().toLowerCase();
+    const list = Store.heads.filter(h => !q || h.name.toLowerCase().includes(q)).sort((a, b) => b.updatedAt - a.updatedAt);
+    const pages = Math.max(1, Math.ceil(list.length / PAGE));
+    S.mine.page = Math.min(S.mine.page, pages - 1);
+    const slice = list.slice(S.mine.page * PAGE, S.mine.page * PAGE + PAGE);
+    host.innerHTML = (slice.length ? '<ul class="rows">' + slice.map(h => `
+      <li class="row simple">
+        <button class="row-main" data-act="open-head" data-id="${esc(h.id)}"><span class="row-name">${esc(h.name)}</span><span class="row-sub"><span>Added ${esc(rel(h.createdAt))}</span></span></button>
+        <div class="row-actions">
+          <button class="btn icon ghost heart${h.liked ? ' on' : ''}" data-act="like-head" data-id="${esc(h.id)}" aria-pressed="${!!h.liked}" aria-label="${h.liked ? 'Remove from favorites' : 'Add to favorites'}" title="${h.liked ? 'Remove from favorites' : 'Add to favorites'}">${h.liked ? ICON.heartOn : ICON.heart}</button>
+          <button class="btn icon ghost" data-act="open-head" data-id="${esc(h.id)}" aria-label="Open ${esc(h.name)}" title="Open">${ICON.eye}</button>
+          <button class="btn icon ghost danger" data-act="del-head" data-id="${esc(h.id)}" aria-label="Delete ${esc(h.name)}" title="Delete">${ICON.del}</button>
+        </div></li>`).join('') + '</ul>' : '<div class="panel empty"><h3>No heads match your search</h3></div>') +
+      (pages > 1 ? `<div class="pager"><button class="btn" data-act="mine-page" data-d="-1" ${S.mine.page === 0 ? 'disabled' : ''}>Previous</button><span>Page ${S.mine.page + 1} of ${pages}</span><button class="btn" data-act="mine-page" data-d="1" ${S.mine.page >= pages - 1 ? 'disabled' : ''}>Next</button></div>` : '');
+  }
+
+  /* ================= head sheet (open / edit) ================= */
+  let sheetEd = null, sheetState = null;
+  function openSheet(id) {
+    const h = Store.heads.find(x => x.id === id);
+    if (!h) { toast('That head no longer exists.', 'err'); return; }
+    sheetState = { id, original: h.name + '\u0000' + h.html, lastFocus: document.activeElement };
+    const sh = $('#sheet');
+    sh.hidden = false;
+    sh.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="Head">
+      <div class="sheet-top"><input id="sh-name" aria-label="Head name" value="${esc(h.name)}" maxlength="160"><button class="btn icon ghost" data-act="sheet-close" aria-label="Close">${ICON.close}</button></div>
+      <div class="sheet-meta"><span>Added ${esc(fmtDate(h.createdAt))}</span>${h.updatedAt !== h.createdAt ? `<span>Changed ${esc(fmtDate(h.updatedAt))}</span>` : ''}</div>
+      <div class="sheet-body"><div id="sh-ed" style="min-height:0"></div><p class="add-msg" id="sh-msg" hidden></p></div>
+      <div class="sheet-foot">
+        <button class="btn" data-act="copy-head" data-id="${esc(h.id)}">${ICON.copy}Copy</button>
+        <button class="btn danger" data-act="del-head" data-id="${esc(h.id)}">${ICON.del}Delete</button>
+        <span class="grow"></span>
+        <button class="btn" data-act="sheet-close">Close</button>
+        <button class="btn primary" data-act="sheet-save">${ICON.save}Save changes</button>
+      </div></div>`;
+    sheetEd = new CodeEditor($('#sh-ed'), { value: h.html, label: 'Head HTML' });
+    sheetEd.ta.focus();
+    document.body.style.overflow = 'hidden';
+  }
+  async function closeSheet(force) {
+    if (!sheetEd) return;
+    const cur = $('#sh-name').value + '\u0000' + sheetEd.getValue();
+    if (!force && cur !== sheetState.original) {
+      const ok = await confirmDialog({ title: 'Close without saving?', body: 'Your changes to this head will be lost.', ok: 'Close without saving', danger: true, cancel: 'Keep editing' });
+      if (!ok) return;
+    }
+    const sh = $('#sheet'); sh.hidden = true; sh.innerHTML = '';
+    document.body.style.overflow = '';
+    const lf = sheetState.lastFocus; sheetEd = null; sheetState = null;
+    if (lf && document.contains(lf)) lf.focus();
+  }
+  async function saveSheet() {
+    const old = Store.heads.find(x => x.id === sheetState.id);
+    if (!old) return;
+    const c = E.cleanHead(sheetEd.getValue());
+    const msg = $('#sh-msg');
+    if (!c.ok) { msg.hidden = false; msg.className = 'add-msg err'; msg.textContent = c.empty ? 'No head content left. Add at least one meta, style or link tag.' : 'Could not save: ' + (c.errors[0] ? 'line ' + c.errors[0].line + ', ' + c.errors[0].msg : 'unreadable code'); return; }
+    const rec = { ...old, name: $('#sh-name').value.trim() || old.name, html: c.html, doctype: c.doctype || old.doctype || null, updatedAt: stamp() };
+    try {
+      await Store.put('heads', rec);
+      Store.heads[Store.heads.findIndex(x => x.id === rec.id)] = rec;
+      toast('Saved ' + rec.name + (c.removed.length ? '. Removed ' + c.removed.join(', ') : ''), 'ok');
+      await closeSheet(true); render();
+    } catch (e) { toast('Could not save: ' + errText(e), 'err'); }
+  }
+  async function deleteHead(id) {
+    const h = Store.heads.find(x => x.id === id);
+    if (!h) return;
+    if (!(await confirmDialog({ title: 'Delete “' + h.name + '”?', body: 'It will be removed from your heads and favorites. This can’t be undone.', ok: 'Delete', danger: true }))) return;
+    try {
+      await Store.del('heads', id);
+      Store.heads = Store.heads.filter(x => x.id !== id);
+      toast('Deleted ' + h.name, 'ok');
+      if (sheetEd) await closeSheet(true);
+      render();
+    } catch (e) { toast('Could not delete: ' + errText(e), 'err'); }
+  }
+  async function toggleHeadLike(id) {
+    const h = Store.heads.find(x => x.id === id);
+    if (!h) return;
+    const rec = { ...h, liked: !h.liked };
+    try {
+      await Store.put('heads', rec);
+      Store.heads[Store.heads.findIndex(x => x.id === id)] = rec;
+      toast(rec.liked ? 'Added to favorites' : 'Removed from favorites', 'ok');
+      render();
+    } catch (e) { toast('Could not update: ' + errText(e), 'err'); }
+  }
+
+  /* ================= generate page ================= */
+  async function runGenerate() {
+    if (S.generating) return;
+    if (S.view !== 'generate') location.hash = 'generate';
+    S.generating = true; S.notice = null; render();
+    await sleep(40);
+    let res;
+    const srcs = mixSources();
+    if (srcs.length < 2) { S.generating = false; toast('Select at least 2 heads to mix.', 'err'); render(); return; }
+    try { res = E.generate(srcs, Store.gens, Store.settings, cache); }
+    catch (e) { res = { ok: false, reason: 'error', message: 'Something went wrong while generating: ' + e.message }; }
+    S.generating = false;
+    if (!res.ok) { S.notice = res; S.current = null; render(); return; }
+    const d = new Date();
+    const ymd = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    let id = 'GEN-' + ymd + '-' + res.signature.slice(0, 6).toUpperCase();
+    for (let k = 2; Store.gens.some(g => g.id === id); k++) id = 'GEN-' + ymd + '-' + res.signature.slice(0, 6).toUpperCase() + '-' + k;
+    const now = stamp();
+    const rec = { id, mixMode: res.mixMode, html: res.html, createdAt: now, updatedAt: now, seed: res.seed, signature: res.signature, pickMap: res.pickMap, components: res.components, builtins: res.builtins, sources: res.sources, sourceNames: res.sourceNames, features: res.features, liked: false };
+    // Remember only the combination (not the code) so future heads stay different.
+    try { await Store.put('gens', memoryOnly(rec)); Store.gens.push(memoryOnly(rec)); }
+    catch (e) { toast('Generated, but it could not be remembered for uniqueness: ' + errText(e), 'err'); }
+    S.current = rec;
+    render();
+  }
+  const memoryOnly = g => ({ id: g.id, createdAt: g.createdAt, updatedAt: g.updatedAt, pickMap: g.pickMap, liked: false });
+  async function setGenLike(rec, on) {
+    const stored = on ? { ...rec, liked: true, updatedAt: stamp() } : memoryOnly({ ...rec, updatedAt: stamp() });
+    try {
+      await Store.put('gens', stored);
+      const i = Store.gens.findIndex(g => g.id === rec.id);
+      if (i >= 0) Store.gens[i] = stored; else Store.gens.push(stored);
+      if (S.current && S.current.id === rec.id) S.current.liked = on;
+      toast(on ? 'Saved to favorites' : 'Removed from favorites', 'ok');
+      render();
+    } catch (e) { toast('Could not update favorites: ' + errText(e), 'err'); }
+  }
+  function featureList(rec) {
+    return E.FEATURES.map(f => `<li><span class="${rec.features[f.id] ? 'yes' : 'no'}">${rec.features[f.id] ? ICON.yes : ICON.no}</span><span>${esc(f.name)}</span></li>`).join('');
+  }
+  function renderGenerate() {
+    const el = $('#v-generate');
+    const rec = S.current;
+    const pickMode = Store.settings.mixSource === 'pick';
+    const valid = pickMode ? mixSources().length : Store.heads.length;
+    const nOk = rec ? Object.values(rec.features).filter(Boolean).length : 0;
+    el.innerHTML = `
+      <div class="view-head"><div><h1>Generate a new head</h1><p>${valid >= 2 ? 'Mixes ' + (pickMode ? 'the ' + plural(valid, 'head') + ' you selected' : 'all ' + plural(valid, 'saved head')) + ' into a new, ready-to-use head. Every press gives a different one.' : pickMode ? 'Select at least two heads below to mix.' : 'Add at least two heads first, then come back here.'}</p></div></div>
+      <div class="gen-hero">
+        <button class="airmail${S.generating ? ' busy' : ''}" data-act="generate" ${S.generating || valid < 2 ? 'disabled' : ''}><span>${ICON.gen}${S.generating ? 'Generating…' : rec ? 'Generate another' : 'Generate head'}</span></button>
+        ${valid < 2 && !pickMode ? `<a class="btn big" href="#add">${ICON.plus}Add heads</a>` : ''}
+        <div class="mix" role="radiogroup" aria-label="Mix intensity"><span class="lbl">Mix intensity</span>
+          <div class="mix-opts">${[['normal', 'Normal', 'Keeps each part the way your heads wrote it'], ['strong', 'Strong', 'Mixes every style value, like Head Mixer']].map(([k, l, d]) => `<button role="radio" aria-checked="${(Store.settings.mixMode || 'normal') === k}" data-act="mix" data-mode="${k}"><b>${l}</b><small>${d}</small></button>`).join('')}</div>
+        </div>
+      </div>
+      ${Store.heads.length + liked().length >= 2 ? `<div class="panel picker">
+        <div class="pick-top"><span class="lbl">Heads to mix</span>
+          <div class="mix-opts" role="radiogroup" aria-label="Heads to mix">${[['all', 'All my heads', 'Every head you added'], ['pick', 'Choose heads', 'Only the ones you tick, including liked generated heads']].map(([k, l, d]) => `<button role="radio" aria-checked="${(Store.settings.mixSource || 'all') === k}" data-act="src" data-src="${k}"><b>${l}</b><small>${d}</small></button>`).join('')}</div>
+          <span class="pill blue" id="pick-count"></span>
+        </div>
+        ${pickMode ? `<div class="pick-body">
+          <div class="pick-tools"><div class="search">${ICON.search}<input class="input" id="pick-q" type="search" placeholder="Search heads" aria-label="Search heads" value="${esc(pickQ)}"></div>
+            <button class="btn" data-act="pick-all">Select all shown</button><button class="btn ghost" data-act="pick-none">Clear selection</button></div>
+          <p class="add-msg err" id="pick-warn" hidden>Select at least 2 heads to mix.</p>
+          <div class="pick-list" id="pick-list"></div>
+        </div>` : ''}
+      </div>` : ''}
+      ${S.notice ? `<div class="notice" role="status"><h3>No new head this time</h3><p>${esc(S.notice.message)}</p><a class="btn" href="#add">${ICON.plus}Add more heads</a></div>` : ''}
+      ${rec ? `<div class="panel result">
+          <div class="out-bar">
+            <div class="btns"><span class="pill ${rec.mixMode === 'strong' ? 'warn' : 'blue'}">${rec.mixMode === 'strong' ? 'Strong mix' : 'Normal mix'}</span><span class="pill ${nOk === E.FEATURES.length ? 'ok' : 'err'}">${nOk === E.FEATURES.length ? 'All ' + nOk + ' email features included' : nOk + ' of ' + E.FEATURES.length + ' email features'}</span></div>
+            <div class="btns">
+              <button class="btn big" data-act="copy-cur">${ICON.copy}Copy</button>
+              <button class="btn big" data-act="dl-cur">${ICON.down}Download</button>
+              <button class="btn big heart-btn${rec.liked ? ' on' : ''}" data-act="like-cur" aria-pressed="${rec.liked}">${rec.liked ? ICON.heartOn + 'Liked' : ICON.heart + 'Like'}</button>
+            </div>
+          </div>
+          <div class="out-ed" id="gen-ed"></div>
+          <details class="inside"><summary>What’s inside this head</summary>
+            <div class="inside-b"><div><h4>Email features</h4><ul class="checks">${featureList(rec)}</ul></div>
+            <div><h4>Built from</h4><div class="chips">${rec.sourceNames.map(n => `<span class="pill">${esc(n)}</span>`).join('') || '<span class="muted">Built-in defaults</span>'}</div>
+            <p class="hint">${rec.mixMode === 'strong' ? 'Styles were mixed value by value from your heads. Meta tags and Outlook blocks use the Head Mixer’s fixed set.' : rec.builtins.filter(b => !/^meta:/.test(b)).length ? 'Parts none of your heads had were added from safe built-in defaults.' : 'Everything came from your own heads.'}</p></div></div>
+          </details>
+        </div>` : (!S.notice && valid >= 2 ? `<div class="panel empty"><h3>Press “Generate head”</h3><p>Your new head will appear here. Like the ones you want to keep and they’ll be saved in Favorites.</p></div>` : '')}
+      ${valid < 2 && !rec ? `<div class="panel empty"><h3>You have ${valid} head${valid === 1 ? '' : 's'}</h3><p>The generator needs at least two to mix. You can also try it with examples.</p><button class="btn" data-act="examples">Add 3 example heads</button></div>` : ''}`;
+    if (rec) new CodeEditor($('#gen-ed'), { readOnly: true, value: rec.html, label: 'Generated head' });
+    if (pickMode) {
+      renderPickList();
+      let t;
+      $('#pick-q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { pickQ = e.target.value; renderPickList(); }, 120); });
+    }
+    updatePickState();
+  }
+
+  /* ================= favorites ================= */
+  function favItems() {
+    const gens = liked().map(g => ({ kind: 'gen', id: g.id, name: genName(g), date: g.createdAt, html: g.html, rec: g }));
+    const heads = Store.heads.filter(h => h.liked).map(h => ({ kind: 'head', id: h.id, name: h.name, date: h.updatedAt, html: h.html, rec: h }));
+    let list = S.fav.tab === 'gen' ? gens : S.fav.tab === 'head' ? heads : gens.concat(heads);
+    const q = S.fav.q.trim().toLowerCase();
+    if (q) list = list.filter(x => x.name.toLowerCase().includes(q) || x.id.toLowerCase().includes(q));
+    return list.sort((a, b) => b.date - a.date);
+  }
+  function renderFavorites() {
+    const el = $('#v-favorites');
+    if (!el.dataset.built) {
+      el.dataset.built = '1';
+      el.innerHTML = `<div class="view-head"><div><h1>Favorites</h1><p>Heads you liked, both generated ones and ones you added.</p></div></div>
+        <div class="toolbar"><div class="tabs" role="tablist" id="fav-tabs"></div><div class="search">${ICON.search}<input class="input" id="fav-q" type="search" placeholder="Search favorites" aria-label="Search favorites"></div></div>
+        <div id="fav-list"></div>`;
+      let t;
+      $('#fav-q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { S.fav.q = e.target.value; renderFavList(); }, 140); });
+    }
+    renderFavList();
+  }
+  function renderFavList() {
+    const gN = liked().length, hN = Store.heads.filter(h => h.liked).length;
+    $('#fav-tabs').innerHTML = [['all', 'All', gN + hN], ['gen', 'Generated', gN], ['head', 'My heads', hN]].map(([k, l, n]) => `<button class="tab" role="tab" aria-selected="${S.fav.tab === k}" data-act="fav-tab" data-tab="${k}">${l} <span>${n}</span></button>`).join('');
+    const list = favItems();
+    const host = $('#fav-list');
+    if (!gN && !hN) { host.innerHTML = `<div class="panel empty"><h3>No favorites yet</h3><p>Press the heart on a generated head, or on one of your own heads, to keep it here.</p><a class="btn primary" href="#generate">${ICON.gen}Generate a head</a></div>`; return; }
+    if (!list.length) { host.innerHTML = '<div class="panel empty"><h3>Nothing here</h3><p>Try another tab or search.</p></div>'; return; }
+    host.innerHTML = '<ul class="hist">' + list.map(x => {
+      const open = S.fav.open === x.id;
+      return `<li class="hist-item${open ? ' open' : ''}">
+        <div class="fav-row">
+          <button class="hist-sum" data-act="fav-open" data-id="${esc(x.id)}" aria-expanded="${open}"><div><div class="fav-name">${esc(x.name)}</div><div class="sub"><span class="pill ${x.kind === 'gen' ? 'blue' : ''}">${x.kind === 'gen' ? 'Generated' : 'My head'}</span><span>${esc(rel(x.date))}</span></div></div>${ICON.chev}</button>
+          <div class="row-actions">
+            <button class="btn icon ghost" data-act="fav-copy" data-id="${esc(x.id)}" aria-label="Copy" title="Copy">${ICON.copy}</button>
+            <button class="btn icon ghost" data-act="fav-dl" data-id="${esc(x.id)}" aria-label="Download" title="Download">${ICON.down}</button>
+            <button class="btn icon ghost heart on" data-act="fav-unlike" data-id="${esc(x.id)}" aria-label="Remove from favorites" title="Remove from favorites">${ICON.heartOn}</button>
+          </div>
+        </div>
+        ${open ? `<div class="fav-body"><div id="fed-${esc(x.id)}"></div></div>` : ''}
+      </li>`;
+    }).join('') + '</ul>';
+    const o = list.find(x => x.id === S.fav.open);
+    if (o) new CodeEditor(document.getElementById('fed-' + o.id), { readOnly: true, value: o.html, label: o.name });
+  }
+  function favById(id) { return favItems().find(x => x.id === id) || null; }
+  const headDoc = h => (h.doctype || DEFAULT_DOCTYPE) + '\n' + (/^\s*<head\b/i.test(h.html) ? h.html : '<head>\n' + h.html + '\n</head>');
+
+  /* ================= settings ================= */
+  function renderSettings() {
+    const el = $('#v-preferences');
+    const st = Store.settings;
+    const remembered = Store.gens.length;
+    const modeText = { cloud: 'Saved to your Claude account. Only you can see it.', local: 'Saved in this browser only. Use Backup to move it to another computer.', memory: 'Not saved. Everything is lost when you close the page. Download a backup.' }[Store.mode];
+    el.innerHTML = `<div class="view-head"><div><h1>Settings</h1></div></div>
+      <div class="set-grid">
+        ${Store.note ? `<div class="notice"><p style="margin:0">${esc(Store.note)}</p></div>` : ''}
+        <div class="panel">
+          <div class="set-row"><div><h3>Where your work is saved</h3><p>${esc(modeText)}</p></div><div class="ctl"><span class="pill ${Store.mode === 'cloud' ? 'ok' : Store.mode === 'local' ? 'warn' : 'err'}">${Store.mode === 'cloud' ? 'Your account' : Store.mode === 'local' ? 'This browser' : 'Not saved'}</span></div></div>
+          <div class="set-row"><div><h3>Backup</h3><p>Download all your heads and favorites as one file, or load a backup file. Loading never replaces what you already have.</p></div><div class="ctl"><button class="btn" data-act="export">${ICON.down}Download backup</button><label class="btn">${ICON.up}Load backup<input type="file" id="imp-json" accept=".json,application/json" class="sr"></label></div></div>
+        </div>
+        <div class="panel">
+          <div class="set-row"><div><h3>How different each new head should be</h3><p>Higher means each generated head changes more parts compared with earlier ones.</p></div><div class="ctl"><select class="select" id="s-mindiff" aria-label="How different">${[[1, 'A little'], [2, 'Normal'], [4, 'Quite different'], [8, 'Very different']].map(([v, l]) => `<option value="${v}" ${st.minDiff === v ? 'selected' : ''}>${l}</option>`).join('')}${[1, 2, 4, 8].includes(st.minDiff) ? '' : `<option value="${st.minDiff}" selected>Custom (${st.minDiff})</option>`}</select></div></div>
+          <div class="set-row"><div><h3>Include a page title</h3><p>Use a title from one of your heads.</p></div><div class="ctl"><label class="switch"><input type="checkbox" id="s-title" ${st.includeTitle ? 'checked' : ''} aria-label="Include a page title"><span></span></label></div></div>
+          <div class="set-row"><div><h3>Start uniqueness over</h3><p>The app remembers ${plural(remembered, 'past generation')} so it never repeats one. Forget them if it says it has run out of new combinations. Favorites stay.</p></div><div class="ctl"><button class="btn" data-act="forget" ${Store.gens.some(g => !g.liked) ? '' : 'disabled'}>Forget past generations</button></div></div>
+        </div>
+        <div class="panel">
+          <div class="set-row"><div><h3>Theme</h3></div><div class="ctl"><select class="select" id="s-theme" aria-label="Theme"><option value="dark" ${st.theme !== 'light' ? 'selected' : ''}>Dark</option><option value="light" ${st.theme === 'light' ? 'selected' : ''}>Light</option></select></div></div>
+          <div class="set-row"><div><h3>Example heads</h3><p>Adds three sample heads to try the generator.</p></div><div class="ctl"><button class="btn" data-act="examples">Add examples</button></div></div>
+          <div class="set-row"><div><h3>Delete all heads</h3><p>Removes every head you added. Generated favorites stay.</p></div><div class="ctl"><button class="btn danger" data-act="clear-heads" ${Store.heads.length ? '' : 'disabled'}>Delete all heads</button></div></div>
+        </div>
+      </div>`;
+    const upd = async (k, v) => { Store.settings[k] = v; try { await Store.saveSettings(); toast('Saved', 'ok'); } catch (e) { toast('Could not save: ' + errText(e), 'err'); } };
+    $('#s-mindiff').addEventListener('change', e => upd('minDiff', parseInt(e.target.value, 10)));
+    $('#s-title').addEventListener('change', e => upd('includeTitle', e.target.checked));
+    $('#s-theme').addEventListener('change', e => { applyTheme(e.target.value); upd('theme', e.target.value); });
+    $('#imp-json').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importBackup(f); });
+  }
+  function applyTheme(t) { if (t === 'light') document.documentElement.setAttribute('data-ui', 'light'); else document.documentElement.removeAttribute('data-ui'); }
+  async function exportBackup() {
+    const data = JSON.stringify({ app: 'envelope-head-library', version: 2, exportedAt: new Date().toISOString(), heads: Store.heads, generations: liked().map(packGen) }, null, 2);
+    await saveFile('head-library-backup-' + new Date().toISOString().slice(0, 10) + '.json', data);
+  }
+  async function importBackup(file) {
+    let data;
+    try { data = JSON.parse(await file.text()); } catch (e) { toast('That file is not a backup file.', 'err'); return; }
+    const heads = Array.isArray(data.heads) ? data.heads : [];
+    const gens = Array.isArray(data.generations) ? data.generations : [];
+    if (!heads.length && !gens.length) { toast('No heads or favorites found in that file.', 'err'); return; }
+    let h = 0, g = 0, skipped = 0;
+    for (const x of heads) {
+      if (!x || typeof x.html !== 'string') continue;
+      try {
+        const r = await addOne((x.doctype || '') + x.html, x.name);
+        if (r.ok) { h++; if (x.liked) { r.rec.liked = true; await Store.put('heads', r.rec); } } else skipped++;
+      } catch (e) { toast('Stopped: ' + errText(e), 'err'); break; }
+    }
+    for (const r of gens) {
+      if (!r || typeof r.html !== 'string' || /<script|<body/i.test(r.html)) continue;
+      if (r.liked === false) continue;
+      let id = String(r.id || 'GEN-IMPORTED').replace(/[^\w\-]/g, '').slice(0, 54);
+      const base = id;
+      for (let k = 2; Store.gens.some(x => x.id === id); k++) id = base + '-' + k;
+      const now = stamp();
+      const rec = { components: [], builtins: [], sources: [], sourceNames: [], features: E.detectFeatures(r.html), seed: 0, ...unpackGen(r), id, liked: true, updatedAt: now, createdAt: r.createdAt || now };
+      try { await Store.put('gens', rec); Store.gens.push(rec); g++; } catch (e) { toast('Stopped: ' + errText(e), 'err'); break; }
+    }
+    toast('Loaded ' + plural(h, 'head') + ' and ' + plural(g, 'favorite') + (skipped ? ', skipped ' + skipped + ' already saved' : ''), 'ok');
+    render();
+  }
+  async function forgetGens() {
+    const list = Store.gens.filter(g => !g.liked);
+    if (!(await confirmDialog({ title: 'Forget ' + plural(list.length, 'past generation') + '?', body: 'New heads may then repeat earlier combinations. Your favorites are kept.', ok: 'Forget', danger: true }))) return;
+    let n = 0;
+    for (const g of list) { try { await Store.del('gens', g.id); Store.gens = Store.gens.filter(x => x.id !== g.id); n++; } catch (e) { toast('Stopped after ' + n + ': ' + errText(e), 'err'); break; } }
+    toast('Forgot ' + plural(n, 'generation'), 'ok'); render();
+  }
+  async function clearHeads() {
+    if (!(await confirmDialog({ title: 'Delete all ' + plural(Store.heads.length, 'head') + '?', body: 'Every head you added will be removed, including liked ones. This can’t be undone.', ok: 'Delete all', danger: true }))) return;
+    let n = 0;
+    for (const h of Store.heads.slice()) { try { await Store.del('heads', h.id); Store.heads = Store.heads.filter(x => x.id !== h.id); n++; } catch (e) { toast('Stopped after ' + n + ': ' + errText(e), 'err'); break; } }
+    toast('Deleted ' + plural(n, 'head'), 'ok'); render();
+  }
+  async function addExamples() {
+    let n = 0;
+    for (const x of EXAMPLES) { try { const r = await addOne(x.html, x.name); if (r.ok) n++; } catch (e) { toast('Could not add: ' + errText(e), 'err'); break; } }
+    toast(n ? 'Added ' + plural(n, 'example head') : 'The examples are already added', 'ok'); render();
+  }
+
+  /* ================= events ================= */
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    const act = b.dataset.act, id = b.dataset.id;
+    switch (act) {
+      case 'add': addFromBox(); break;
+      case 'open-head': openSheet(id); break;
+      case 'del-head': deleteHead(id); break;
+      case 'like-head': toggleHeadLike(id); break;
+      case 'copy-head': { const h = Store.heads.find(x => x.id === id); if (h) toast((await copyText(h.html)) ? 'Copied' : 'Copy failed. Select the code and copy it.', 'ok'); break; }
+      case 'sheet-close': closeSheet(false); break;
+      case 'sheet-save': saveSheet(); break;
+      case 'mine-page': S.mine.page += parseInt(b.dataset.d, 10); renderMine(); break;
+      case 'generate': runGenerate(); break;
+      case 'src': {
+        const m = b.dataset.src;
+        if (Store.settings.mixSource === m) break;
+        Store.settings.mixSource = m;
+        if (m === 'pick' && !(Store.settings.picked || []).length) Store.settings.picked = Store.heads.filter(h => h.liked).map(h => h.id).concat(liked().map(g => g.id));
+        savePicks();
+        renderGenerate();
+        break;
+      }
+      case 'pick-all': { const set = picked(); const { gens, heads } = pickCandidates(); gens.concat(heads).forEach(x => set.add(x.id)); setPicked(set); renderPickList(); break; }
+      case 'pick-none': setPicked(new Set()); renderPickList(); break;
+      case 'mix': {
+        const m = b.dataset.mode;
+        if (Store.settings.mixMode === m) break;
+        Store.settings.mixMode = m;
+        $$('[data-act="mix"]').forEach(x => x.setAttribute('aria-checked', String(x.dataset.mode === m)));
+        Store.saveSettings().catch(err => toast('Could not save your choice: ' + errText(err), 'err'));
+        break;
+      }
+      case 'copy-cur': if (S.current) toast((await copyText(S.current.html)) ? 'Copied' : 'Copy failed. Select the code and copy it.', 'ok'); break;
+      case 'dl-cur': if (S.current) saveFile(S.current.id + '.html', S.current.html); break;
+      case 'like-cur': if (S.current) setGenLike(S.current, !S.current.liked); break;
+      case 'fav-tab': S.fav.tab = b.dataset.tab; renderFavList(); break;
+      case 'fav-open': S.fav.open = S.fav.open === id ? null : id; renderFavList(); break;
+      case 'fav-copy': { const x = favById(id); if (x) toast((await copyText(x.kind === 'gen' ? x.html : headDoc(x.rec))) ? 'Copied' : 'Copy failed. Select the code and copy it.', 'ok'); break; }
+      case 'fav-dl': { const x = favById(id); if (x) saveFile((x.kind === 'gen' ? x.id : x.name.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-') || 'head') + '.html', x.kind === 'gen' ? x.html : headDoc(x.rec)); break; }
+      case 'fav-unlike': { const x = favById(id); if (!x) break; if (x.kind === 'gen') setGenLike(x.rec, false); else toggleHeadLike(x.id); break; }
+      case 'examples': addExamples(); break;
+      case 'export': exportBackup(); break;
+      case 'forget': forgetGens(); break;
+      case 'clear-heads': clearHeads(); break;
+    }
+  });
+  document.addEventListener('change', e => {
+    const id = e.target && e.target.dataset && e.target.dataset.pick;
+    if (!id) return;
+    const set = picked();
+    if (e.target.checked) set.add(id); else set.delete(id);
+    setPicked(set);
+  });
+  document.addEventListener('keydown', e => {
+    if (sheetEd) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveSheet(); }
+      if (e.key === 'Escape' && !$('#dlg').open && (document.activeElement !== sheetEd.ta || sheetEd.escCount >= 2)) closeSheet(false);
+    } else if (S.view === 'add' && addEd && document.activeElement === addEd.ta && (e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); addFromBox(); }
+  });
+  $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(false); });
+  window.addEventListener('hashchange', route);
+
+  const EXAMPLES = window.__EXAMPLES__ || [];
+
+  /* ================= boot ================= */
+  (async () => {
+    await Store.init();
+    applyTheme(Store.settings.theme);
+    $('#store-foot').innerHTML = '<span class="dot ' + Store.mode + '"></span>' + ({ cloud: 'Saved to your account', local: 'Saved in this browser', memory: 'Not saved, download a backup' })[Store.mode];
+    if (Store.note) toast(Store.note, 'err');
+    lastStamp = Math.max(0, ...Store.heads.map(h => h.updatedAt || 0), ...Store.gens.map(g => g.updatedAt || 0));
+    $('#boot').hidden = true;
+    route();
+  })();
+})();
+
+</script>
+</body>
+</html>
+{% endraw %}
