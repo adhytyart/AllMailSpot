@@ -3,10 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ADIMON Favicon -->
-<link rel="icon" type="image/png" href="/adimon-logo.png">
-<link rel="apple-touch-icon" href="/adimon-logo.png">
-<meta name="theme-color" content="#000000">
     <title>AllMailSpot - Live Mailboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -174,6 +170,11 @@
                     <button onclick="copyHeadContent()" class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
                         <i class="fa-solid fa-copy text-blue-600 dark:text-blue-400"></i>
                         <span>Copy &lt;head&gt;</span>
+                    </button>
+
+                    <button onclick="findHeadTag()" class="px-3 py-1.5 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                        <i class="fa-solid fa-magnifying-glass text-amber-600 dark:text-amber-400"></i>
+                        <span>Find &lt;/head&gt;</span>
                     </button>
 
                     <button onclick="toggleStarActiveEmail()" id="inspectorStarBtn" class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
