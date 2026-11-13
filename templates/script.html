@@ -63,11 +63,15 @@
                     </div>
 
                     <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1 shadow-sm text-xs">
-                        <i class="fa-regular fa-calendar text-slate-500 dark:text-slate-400"></i>
                         <input type="date" id="dateFrom" onchange="startFreshSync()" title="From Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer text-[11px]">
                         <span class="text-slate-400 font-bold">-</span>
                         <input type="date" id="dateTo" onchange="startFreshSync()" title="To Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer text-[11px]">
                     </div>
+
+                    <a href="/head-mixer" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold rounded-lg flex items-center space-x-1 shadow-sm transition text-decoration-none">
+                        <i class="fa-solid fa-layer-group text-purple-600 dark:text-purple-400"></i>
+                        <span>Head Mixer</span>
+                    </a>
 
                     <button onclick="toggleTheme()" title="Toggle Theme" class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs transition shadow-sm">
                         <i id="themeIcon" class="fa-solid fa-moon"></i>
@@ -166,6 +170,11 @@
                     <button onclick="copyHeadContent()" class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
                         <i class="fa-solid fa-copy text-blue-600 dark:text-blue-400"></i>
                         <span>Copy &lt;head&gt;</span>
+                    </button>
+
+                    <button onclick="toggleStarActiveEmail()" id="inspectorStarBtn" class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
+                        <i id="inspectorStarIcon" class="fa-regular fa-star text-amber-600 dark:text-amber-400"></i>
+                        <span id="inspectorStarText">Star Head</span>
                     </button>
 
                     <button onclick="toggleFindReplaceBar()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
@@ -1003,6 +1012,95 @@
             if (!str) return '';
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
+    </script><script>
+        // Safely extracts ONLY the <head> section from raw or actively edited content
+function extractHeadOnly(html) {
+    if (!html) return '<head>\n<meta charset="utf-8">\n</head>';
+    const headMatch = html.match(/<head\b[^>]*>([\s\S]*?)<\/head\s*>/i);
+    if (headMatch) return headMatch[0];
+    const bodySplit = html.split(/<body\b/i)[0];
+    if (bodySplit && bodySplit !== html) return `<head>\n${bodySplit}\n</head>`;
+    return `<head>\n${html}\n</head>`;
+}
+
+// Toggles the star state for an email card and syncs to Head Mixer DB
+function toggleStarEmail(mailId, event) {
+    if (event) event.stopPropagation();
+    const mail = fetchedEmails.find(e => e.id === mailId);
+    if (!mail) return;
+
+    let rawContent = mail.content;
+    if (activeIndex !== null && displayedFilteredEmails[activeIndex]?.id === mailId && typeof cmEditor !== 'undefined' && cmEditor) {
+        rawContent = cmEditor.getValue();
+    }
+
+    const cleanHead = extractHeadOnly(rawContent);
+    let starred = JSON.parse(localStorage.getItem('allmailspot_starred_heads') || '{}');
+    const isStarred = !starred[mailId];
+    starred[mailId] = isStarred;
+    localStorage.setItem('allmailspot_starred_heads', JSON.stringify(starred));
+
+    const headName = `${mail.from_name} + ${mail.source}`.substring(0, 140);
+    saveHeadToHeadMixerDB(mail.id, headName, cleanHead, isStarred);
+    
+    if (typeof renderFilteredGrids === 'function') renderFilteredGrids();
+    updateInspectorStarButtonState();
+}
+
+function toggleStarActiveEmail() {
+    if (activeIndex === null || !displayedFilteredEmails[activeIndex]) return;
+    const mail = displayedFilteredEmails[activeIndex];
+    toggleStarEmail(mail.id);
+}
+
+function updateInspectorStarButtonState() {
+    if (activeIndex === null || !displayedFilteredEmails[activeIndex]) return;
+    const mailId = displayedFilteredEmails[activeIndex].id;
+    const starred = JSON.parse(localStorage.getItem('allmailspot_starred_heads') || '{}');
+    const isStarred = !!starred[mailId];
+
+    const icon = document.getElementById('inspectorStarIcon');
+    const text = document.getElementById('inspectorStarText');
+    if (icon && text) {
+        icon.className = isStarred ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star text-amber-600 dark:text-amber-400';
+        text.textContent = isStarred ? 'Starred in Mixer' : 'Star Head';
+    }
+}
+
+// Connects specifically to the Head Mixer's database without touching your main app DB
+function saveHeadToHeadMixerDB(id, headName, headHtml, isStarred) {
+    try {
+        const request = indexedDB.open('envelope-head-library', 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('heads')) {
+                db.createObjectStore('heads', { keyPath: 'id' });
+            }
+        };
+        request.onsuccess = (e) => {
+            const db = e.target.result;
+            const tx = db.transaction('heads', 'readwrite');
+            const store = tx.objectStore('heads');
+            if (isStarred) {
+                store.put({
+                    id: id,
+                    name: headName,
+                    html: headHtml,
+                    doctype: '<!DOCTYPE html>',
+                    liked: false,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                });
+                if (typeof showToast === 'function') showToast('Saved head to Head Mixer storage!');
+            } else {
+                store.delete(id);
+                if (typeof showToast === 'function') showToast('Removed head from Head Mixer storage.');
+            }
+        };
+    } catch (err) {
+        console.error("Head Mixer DB error:", err);
+    }
+}
     </script>
 </body>
 </html>
