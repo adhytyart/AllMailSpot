@@ -720,6 +720,8 @@
 
             document.getElementById('inspectorOverlay').classList.remove('hidden');
             setTimeout(() => cmEditor.refresh(), 50);
+
+            updateInspectorStarButtonState();
         }
 
         function navigateMail(direction) {
@@ -1013,7 +1015,13 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
     </script><script>
-        // Safely extracts ONLY the <head> section from raw or actively edited content
+        // Generates a bulletproof unique key for each email item
+function getUniqueMailKey(mail) {
+    if (!mail) return null;
+    return String(mail.id || mail.uid || `${mail.from_email}_${mail.subject}_${mail.date || ''}`);
+}
+
+// Safely extracts ONLY the <head> section from raw or actively edited content
 function extractHeadOnly(html) {
     if (!html) return '<head>\n<meta charset="utf-8">\n</head>';
     const headMatch = html.match(/<head\b[^>]*>([\s\S]*?)<\/head\s*>/i);
@@ -1023,25 +1031,33 @@ function extractHeadOnly(html) {
     return `<head>\n${html}\n</head>`;
 }
 
-// Toggles the star state for an email card and syncs to Head Mixer DB
+// Toggles the star state and syncs to Head Mixer's DB independently
 function toggleStarEmail(mailId, event) {
     if (event) event.stopPropagation();
-    const mail = fetchedEmails.find(e => e.id === mailId);
+    const mail = fetchedEmails.find(e => getUniqueMailKey(e) === String(mailId) || String(e.id) === String(mailId));
     if (!mail) return;
 
+    const uniqueKey = getUniqueMailKey(mail);
     let rawContent = mail.content;
-    if (activeIndex !== null && displayedFilteredEmails[activeIndex]?.id === mailId && typeof cmEditor !== 'undefined' && cmEditor) {
+    
+    // Grabs active text from your code editor if it's currently open and edited
+    if (activeIndex !== null && displayedFilteredEmails[activeIndex] && getUniqueMailKey(displayedFilteredEmails[activeIndex]) === uniqueKey && typeof cmEditor !== 'undefined' && cmEditor) {
         rawContent = cmEditor.getValue();
     }
 
     const cleanHead = extractHeadOnly(rawContent);
     let starred = JSON.parse(localStorage.getItem('allmailspot_starred_heads') || '{}');
-    const isStarred = !starred[mailId];
-    starred[mailId] = isStarred;
+    const isStarred = !starred[uniqueKey];
+    
+    if (isStarred) {
+        starred[uniqueKey] = true;
+    } else {
+        delete starred[uniqueKey];
+    }
     localStorage.setItem('allmailspot_starred_heads', JSON.stringify(starred));
 
     const headName = `${mail.from_name} + ${mail.source}`.substring(0, 140);
-    saveHeadToHeadMixerDB(mail.id, headName, cleanHead, isStarred);
+    saveHeadToHeadMixerDB(uniqueKey, headName, cleanHead, isStarred);
     
     if (typeof renderFilteredGrids === 'function') renderFilteredGrids();
     updateInspectorStarButtonState();
@@ -1049,25 +1065,31 @@ function toggleStarEmail(mailId, event) {
 
 function toggleStarActiveEmail() {
     if (activeIndex === null || !displayedFilteredEmails[activeIndex]) return;
-    const mail = displayedFilteredEmails[activeIndex];
-    toggleStarEmail(mail.id);
+    const uniqueKey = getUniqueMailKey(displayedFilteredEmails[activeIndex]);
+    toggleStarEmail(uniqueKey);
 }
 
+// Updates the Star button appearance independently per email
 function updateInspectorStarButtonState() {
-    if (activeIndex === null || !displayedFilteredEmails[activeIndex]) return;
-    const mailId = displayedFilteredEmails[activeIndex].id;
-    const starred = JSON.parse(localStorage.getItem('allmailspot_starred_heads') || '{}');
-    const isStarred = !!starred[mailId];
-
     const icon = document.getElementById('inspectorStarIcon');
     const text = document.getElementById('inspectorStarText');
-    if (icon && text) {
-        icon.className = isStarred ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star text-amber-600 dark:text-amber-400';
-        text.textContent = isStarred ? 'Starred in Mixer' : 'Star Head';
+    if (!icon || !text) return;
+
+    if (activeIndex === null || !displayedFilteredEmails[activeIndex]) {
+        icon.className = 'fa-regular fa-star text-amber-600 dark:text-amber-400';
+        text.textContent = 'Star Head';
+        return;
     }
+
+    const uniqueKey = getUniqueMailKey(displayedFilteredEmails[activeIndex]);
+    const starred = JSON.parse(localStorage.getItem('allmailspot_starred_heads') || '{}');
+    const isStarred = !!starred[uniqueKey];
+
+    icon.className = isStarred ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star text-amber-600 dark:text-amber-400';
+    text.textContent = isStarred ? 'Starred in Mixer' : 'Star Head';
 }
 
-// Connects specifically to the Head Mixer's database without touching your main app DB
+// Writes directly to Head Mixer's IndexedDB storage without touching your app's main storage
 function saveHeadToHeadMixerDB(id, headName, headHtml, isStarred) {
     try {
         const request = indexedDB.open('envelope-head-library', 1);
