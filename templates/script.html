@@ -31,7 +31,7 @@
             height: 100%;
             font-family: 'Fira Code', Consolas, Monaco, monospace;
             font-size: 13px;
-            line-height: 1.5;
+            line-height: 1.4;
         }
         .CodeMirror-activeline-background { background: rgba(99, 102, 241, 0.15) !important; }
         .cm-search-highlight { background-color: #fef08a !important; border: 1px solid #eab308; border-radius: 2px; }
@@ -41,57 +41,54 @@
 
     <div>
         <!-- Top Navigation Bar -->
-        <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-30 px-4 py-3 shadow-sm transition-colors duration-200">
+        <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-30 px-4 py-2.5 shadow-sm transition-colors duration-200">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center">
-                        <i class="fa-solid fa-envelope-open-text text-lg"></i>
+                    <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white p-2 rounded-xl shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center">
+                        <i class="fa-solid fa-envelope-open-text text-base"></i>
                     </div>
                     <div>
-                        <h1 class="font-black text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-                            AllMailSpot <span class="text-[10px] bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded font-bold uppercase">Pro</span>
+                        <h1 class="font-black text-base text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                            AllMailSpot <span class="text-[9px] bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 px-1 py-0.5 rounded font-bold uppercase">Pro</span>
                         </h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Live Multi-ID Streamer & Inspector</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Live Multi-ID Streamer & Inspector</p>
                     </div>
                 </div>
 
                 <!-- Controls & Search -->
-                <div class="flex items-center space-x-3 flex-wrap">
-                    <!-- Search Input -->
-                    <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm focus-within:border-green-600">
+                <div class="flex items-center space-x-2.5 flex-wrap">
+                    <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-sm focus-within:border-green-600">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="renderFilteredGrids()" placeholder="Search emails..." class="bg-transparent text-xs text-slate-700 dark:text-slate-200 font-medium outline-none w-36 sm:w-48">
+                        <input type="text" id="searchInput" oninput="renderFilteredGrids()" placeholder="Search emails..." class="bg-transparent text-xs text-slate-700 dark:text-slate-200 font-medium outline-none w-32 sm:w-44">
                     </div>
 
-                    <!-- DATE RANGE PICKERS -->
-                    <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 shadow-sm text-xs">
+                    <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1 shadow-sm text-xs">
                         <i class="fa-regular fa-calendar text-slate-500 dark:text-slate-400"></i>
-                        <input type="date" id="dateFrom" onchange="startFreshSync()" title="From Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer">
+                        <input type="date" id="dateFrom" onchange="startFreshSync()" title="From Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer text-[11px]">
                         <span class="text-slate-400 font-bold">-</span>
-                        <input type="date" id="dateTo" onchange="startFreshSync()" title="To Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer">
+                        <input type="date" id="dateTo" onchange="startFreshSync()" title="To Date" class="bg-transparent text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer text-[11px]">
                     </div>
 
-                    <!-- THEME TOGGLE BUTTON -->
-                    <button onclick="toggleTheme()" title="Toggle Theme" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs transition shadow-sm">
+                    <button onclick="toggleTheme()" title="Toggle Theme" class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs transition shadow-sm">
                         <i id="themeIcon" class="fa-solid fa-moon"></i>
                     </button>
 
-                    <button onclick="toggleConfigModal()" class="px-3 py-1.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition">
+                    <button onclick="toggleConfigModal()" class="px-2.5 py-1 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold rounded-lg flex items-center space-x-1 shadow-sm transition">
                         <i class="fa-solid fa-key text-green-600 dark:text-green-400"></i>
                         <span>Accounts (<span id="accountCountBadge">3</span>)</span>
                     </button>
 
-                    <button onclick="startFreshSync()" id="fetchBtn" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-2 transition shadow-md shadow-green-200 dark:shadow-none">
+                    <button onclick="startFreshSync()" id="fetchBtn" class="px-3.5 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-sm">
                         <i class="fa-solid fa-rotate-right" id="refreshSpinner"></i>
-                        <span>Sync Live</span>
+                        <span>Sync</span>
                     </button>
                 </div>
             </div>
         </header>
 
         <!-- Main Container -->
-        <main class="max-w-7xl mx-auto p-4 md:p-6">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 rounded-xl shadow-xs mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors duration-200">
+        <main class="max-w-7xl mx-auto p-4 md:p-5">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-xs mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors duration-200">
                 <div class="flex items-center space-x-3">
                     <div class="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center space-x-2">
                         <span>Displaying <span id="mailCount" class="font-bold text-slate-900 dark:text-white">0</span> emails</span>
@@ -109,113 +106,184 @@
                 </div>
             </div>
 
-            <!-- DEFAULT FULL-WIDTH GRID (5 Columns Desktop / 2 Mobile) -->
-            <div id="emailGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- DEFAULT FULL-WIDTH GRID -->
+            <div id="emailGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
                 <!-- Dynamic Cards Populated Here -->
             </div>
 
-            <div id="emptyState" class="hidden text-center py-24 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
+            <div id="emptyState" class="hidden text-center py-20 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
                 <i class="fa-solid fa-inbox text-4xl text-slate-300 dark:text-slate-700 mb-3"></i>
-                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">No Emails Found</h3>
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Click "Sync" to Innitiate</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">Make sure your Yahoo App Passwords and Spot IDs are correctly configured and match the target date range.</p>
             </div>
         </main>
     </div>
 
     <!-- FOOTER -->
-    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-10 transition-colors duration-200">
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-3 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-8 transition-colors duration-200">
         <p>&copy; 2026 AllMailSpot. All rights reserved. &bull; Designed By <strong class="text-green-600 dark:text-green-400 font-bold">"Adimon"</strong></p>
     </footer>
 
     <!-- FULLSCREEN SPLIT INSPECTOR OVERLAY -->
     <div id="inspectorOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex hidden">
-        <div class="w-full md:w-5/12 lg:w-4/12 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-full shadow-2xl transition-colors duration-200">
-            <div class="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-2">
+        <div class="w-full md:w-4/12 lg:w-3/12 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-full shadow-2xl transition-colors duration-200">
+            <div class="p-2.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
                     <i class="fa-solid fa-layer-group text-green-600 dark:text-green-400"></i>
                     <span>All Emails Stream</span>
                 </span>
-                <button onclick="closeInspector()" class="px-2.5 py-1 text-xs bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded flex items-center space-x-1 shadow-xs transition">
+                <button onclick="closeInspector()" class="px-2 py-0.5 text-[11px] bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded flex items-center space-x-1 shadow-xs transition">
                     <i class="fa-solid fa-xmark"></i>
-                    <span>Close View</span>
+                    <span>Close</span>
                 </button>
             </div>
 
-            <div id="sideEmailGrid" class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-2.5 align-content-start bg-slate-50/50 dark:bg-slate-950/50"></div>
+            <div id="sideEmailGrid" class="flex-1 overflow-y-auto p-2.5 grid grid-cols-2 gap-2 align-content-start bg-slate-50/50 dark:bg-slate-950/50"></div>
         </div>
 
         <div class="hidden md:flex flex-1 bg-white dark:bg-slate-900 flex-col h-full transition-colors duration-200">
-            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
-                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
-                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs mr-2">
-                        <button onclick="navigateMail('prev')" id="prevMailBtn" title="Previous Email (Left Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
-                            <i class="fa-solid fa-chevron-left"></i>
+            <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs shadow-xs mr-1">
+                        <button onclick="navigateMail('prev')" id="prevMailBtn" title="Previous Email (Left Arrow)" class="px-2 py-1 rounded text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
                         </button>
                         <span class="text-slate-300 dark:text-slate-700 font-bold">|</span>
-                        <button onclick="navigateMail('next')" id="nextMailBtn" title="Next Email (Right Arrow)" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
-                            <i class="fa-solid fa-chevron-right"></i>
+                        <button onclick="navigateMail('next')" id="nextMailBtn" title="Next Email (Right Arrow)" class="px-2 py-1 rounded text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition font-bold">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
                         </button>
                     </div>
 
-                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shadow-xs">
-                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition">
-                            <i class="fa-solid fa-eye mr-1"></i> Live Preview
+                    <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs shadow-xs">
+                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3 py-1 rounded-md bg-green-600 text-white font-semibold transition text-xs">
+                            <i class="fa-solid fa-eye mr-1"></i> Preview
                         </button>
-                        <button onclick="switchTab('editor')" id="tab-editor" class="px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-200 font-semibold transition">
-                            <i class="fa-solid fa-code text-orange-500 mr-1"></i> HTML Editor
+                        <button onclick="switchTab('editor')" id="tab-editor" class="px-3 py-1 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-200 font-semibold transition text-xs">
+                            <i class="fa-solid fa-code text-orange-500 mr-1"></i> Editor
                         </button>
                     </div>
 
-                    <button onclick="copyHeadContent()" class="px-3 py-1.5 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                    <button onclick="copyHeadContent()" class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
                         <i class="fa-solid fa-copy text-blue-600 dark:text-blue-400"></i>
                         <span>Copy &lt;head&gt;</span>
                     </button>
 
-                    <button onclick="findHeadTag()" class="px-3 py-1.5 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
-                        <i class="fa-solid fa-magnifying-glass text-amber-600 dark:text-amber-400"></i>
-                        <span>Find &lt;/head&gt;</span>
+                    <button onclick="toggleFindReplaceBar()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
+                        <i class="fa-solid fa-search text-indigo-600 dark:text-indigo-400"></i>
+                        <span>Find & Replace</span>
                     </button>
 
-                    <button onclick="disableEmailLinks()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition shadow-xs">
+                    <button onclick="disableEmailLinks()" class="px-2.5 py-1 bg-rose-50 dark:bg-rose-950 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-[11px] font-semibold rounded-lg flex items-center space-x-1 transition shadow-xs">
                         <i class="fa-solid fa-link-slash text-rose-600 dark:text-rose-400"></i>
-                        <span>Remove Dots in Links</span>
+                        <span>Strip Link Dots</span>
                     </button>
                 </div>
                 
                 <button onclick="closeInspector()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-base transition ml-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div class="px-5 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
-                <div class="flex items-center space-x-2">
-                    <h2 id="modalSubject" class="font-bold text-slate-900 dark:text-white text-sm truncate">Select an Email</h2>
-                    <button onclick="copyDirectText('modalSubject', 'Subject')" title="Copy Subject" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded text-[10px] font-semibold flex items-center space-x-1 shrink-0 transition">
-                        <i class="fa-solid fa-copy"></i>
-                        <span>Copy</span>
-                    </button>
+            <!-- COMPACT EMAIL META PANEL (~28% max height layout with restored original + decoded values) -->
+            <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 space-y-1.5 text-xs max-h-[30vh] overflow-y-auto">
+                <!-- Row 1: From Name, From Email, Account Brief -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="font-bold text-slate-400 text-[9px] uppercase block">From Name</span>
+                            <span id="modalFromName" class="font-bold text-green-600 dark:text-green-400 truncate block text-[11px]">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalFromName', 'From Name')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="font-bold text-slate-400 text-[9px] uppercase block">From Email</span>
+                            <span id="modalFromEmail" class="font-mono text-slate-700 dark:text-slate-300 truncate block text-[11px]">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalFromEmail', 'From Email')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="font-bold text-slate-400 text-[9px] uppercase block">Account / Date</span>
+                            <span id="modalMetaBrief" class="font-semibold text-slate-700 dark:text-slate-200 truncate block text-[11px]">--</span>
+                        </div>
+                        <span id="modalSourceBadge" class="text-[9px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950 px-1 py-0.5 rounded border border-purple-200 dark:border-purple-800 shrink-0">--</span>
+                    </div>
                 </div>
 
-                <div class="flex flex-wrap items-center text-xs text-slate-500 dark:text-slate-400 gap-x-4 gap-y-1">
-                    <div class="flex items-center space-x-1.5">
-                        <span class="text-slate-400">From:</span> 
-                        <span id="modalFromName" class="text-green-600 dark:text-green-400 font-bold"></span>
-                        <button onclick="copyDirectText('modalFromName', 'From Name')" title="Copy From Name" class="px-1.5 py-0.2 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded text-[9px] font-semibold flex items-center space-x-1 transition">
-                            <i class="fa-solid fa-copy"></i>
-                            <span>Copy</span>
-                        </button>
-                        <span>(<span id="modalFromEmail"></span>)</span>
+                <!-- Row 2: Subject -->
+                <div class="flex items-center justify-between gap-2 bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center space-x-2 overflow-hidden">
+                        <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 shrink-0">Subject</span>
+                        <h2 id="modalSubject" class="font-bold text-slate-900 dark:text-white text-xs truncate">Select an Email</h2>
                     </div>
-                    <div><span class="text-slate-400">Account:</span> <span id="modalAccount" class="text-slate-700 dark:text-slate-300 font-medium"></span></div>
-                    <div><span class="text-slate-400">Date:</span> <span id="modalDate" class="text-slate-700 dark:text-slate-300 font-medium"></span></div>
-                    <div><span class="text-slate-400">Source:</span> <span id="modalSource" class="text-purple-600 dark:text-purple-400 font-bold"></span></div>
+                    <button onclick="copyDirectText('modalSubject', 'Subject')" title="Copy Subject" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded text-[10px] font-semibold shrink-0">Copy</button>
+                </div>
+
+                <!-- Row 3: Return-Path (Original vs Decoded Template) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="text-[9px] uppercase font-bold text-slate-400">Original Return-Path</span>
+                            <span id="modalReturnPath" class="font-mono text-slate-700 dark:text-slate-300 truncate block">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalReturnPath', 'Return-Path')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="text-[9px] uppercase font-bold text-purple-600 dark:text-purple-400">Dynamic Return-Path Template</span>
+                            <span id="modalDecodedReturnPath" class="font-mono text-purple-700 dark:text-purple-300 truncate block">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalDecodedReturnPath', 'Dynamic Return-Path Template')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Row 4: Message-ID (Original vs Decoded Template) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="text-[9px] uppercase font-bold text-slate-400">Original Message-ID</span>
+                            <span id="modalMessageId" class="font-mono text-slate-700 dark:text-slate-300 truncate block">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalMessageId', 'Message-ID')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="truncate pr-1">
+                            <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400">Dynamic Message-ID Template</span>
+                            <span id="modalDecodedMessageId" class="font-mono text-green-700 dark:text-green-300 truncate block">--</span>
+                        </div>
+                        <button onclick="copyDirectText('modalDecodedMessageId', 'Dynamic Message-ID Template')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] font-semibold shrink-0">Copy</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex-1 relative overflow-hidden bg-white dark:bg-slate-900">
+            <!-- PREVIEW & EDITOR VIEWPORT -->
+            <div class="flex-1 relative overflow-hidden bg-white dark:bg-slate-900 flex flex-col">
                 <div id="view-preview" class="absolute inset-0 bg-white dark:bg-slate-900">
                     <iframe id="previewIframe" class="w-full h-full border-0 bg-white dark:bg-slate-900"></iframe>
                 </div>
 
                 <div id="view-editor" class="absolute inset-0 bg-white dark:bg-slate-900 hidden flex flex-col">
+                    <!-- FIND & REPLACE TOOLBAR -->
+                    <div id="findReplaceBar" class="hidden bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center space-x-2 flex-wrap">
+                            <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 shadow-xs">
+                                <i class="fa-solid fa-magnifying-glass text-slate-400 text-[10px]"></i>
+                                <input type="text" id="findInput" oninput="executeFind()" placeholder="Find..." class="bg-transparent outline-none text-xs w-28 text-slate-800 dark:text-slate-100">
+                            </div>
+                            <div class="flex items-center space-x-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 shadow-xs">
+                                <i class="fa-solid fa-pen text-slate-400 text-[10px]"></i>
+                                <input type="text" id="replaceInput" placeholder="Replace..." class="bg-transparent outline-none text-xs w-28 text-slate-800 dark:text-slate-100">
+                            </div>
+                            <span id="findMatchCount" class="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">0 matches</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="findPreviousMatch()" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-xs font-semibold hover:bg-slate-50 transition" title="Previous Match"><i class="fa-solid fa-chevron-up text-[10px]"></i> Prev</button>
+                            <button onclick="findNextMatch()" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-xs font-semibold hover:bg-slate-50 transition" title="Next Match">Next <i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+                            <button onclick="replaceCurrentMatch()" class="px-2.5 py-1 bg-amber-600 text-white rounded font-semibold hover:bg-amber-700 transition">Replace</button>
+                            <button onclick="replaceAllMatches()" class="px-2.5 py-1 bg-purple-600 text-white rounded font-semibold hover:bg-purple-700 transition">Replace All</button>
+                            <button onclick="toggleFindReplaceBar()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white px-1"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
                     <div class="p-2 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-950">
                         <span class="font-medium text-slate-500 dark:text-slate-400">Colorful Code Editor (Live edits sync directly)</span>
                         <div class="flex items-center space-x-2">
@@ -257,6 +325,82 @@
     </div>
 
     <script>
+        // --- ADVANCED DYNAMIC MESSAGE ID & RETURN PATH DECODER ---
+        class DynamicMessageIdDecoder {
+    constructor() {
+        this.delimiterRegex = /([.\-_=+/?><&%#!])/g;
+    }
+
+    classifySegment(segment) {
+        if (/^\d{14}$/.test(segment)) {
+            return { type: "utime", value: segment, description: "14-digit UTC Timestamp" };
+        } else if (/^[0-9a-fA-F]+$/.test(segment)) {
+            const isUpper = segment === segment.toUpperCase();
+            const hexType = isUpper ? "uhex" : "hex";
+            return { type: `${hexType}${segment.length}`, value: segment, description: `${segment.length}-character Hexadecimal` };
+        } else if (/^\d+$/.test(segment)) {
+            return { type: `math${segment.length}`, value: segment, description: `${segment.length}-digit Numeric` };
+        } else if (/[a-zA-Z]/.test(segment) && /\d/.test(segment)) {
+            return { type: `mix${segment.length}`, value: segment, description: `${segment.length}-character Alphanumeric Mixed` };
+        } else {
+            return { type: `rand${segment.length}`, value: segment, description: `${segment.length}-character Random Token` };
+        }
+    }
+
+    decode(messageId) {
+        if (!messageId || typeof messageId !== 'string' || messageId.trim() === '' || messageId === 'N/A') {
+            return { template: 'N/A', domain: 'N/A', localPart: 'N/A', components: {} };
+        }
+
+        let cleanId = messageId.trim();
+        if (cleanId.startsWith("<") && cleanId.endsWith(">")) {
+            cleanId = cleanId.substring(1, cleanId.length - 1).trim();
+        }
+
+        const atIndex = cleanId.lastIndexOf('@');
+        if (atIndex === -1) {
+            return { domain: '', localPart: cleanId, template: cleanId, components: {} };
+        }
+
+        const localPart = cleanId.substring(0, atIndex);
+        const domain = cleanId.substring(atIndex + 1);
+
+        const rawTokens = localPart.split(this.delimiterRegex);
+        
+        let templateParts = [];
+        let components = {};
+
+        rawTokens.forEach((token) => {
+            if (!token) return;
+
+            if (this.delimiterRegex.test(token)) {
+                templateParts.push(token);
+                this.delimiterRegex.lastIndex = 0;
+            } else {
+                const classified = this.classifySegment(token);
+                const tokenKey = classified.type;
+
+                templateParts.push(`{${tokenKey}}`);
+                components[tokenKey] = {
+                    value: token,
+                    type: classified.description
+                };
+            }
+        });
+
+        const template = templateParts.join("") + "@" + domain;
+
+        return {
+            domain: domain,
+            localPart: localPart,
+            template: template,
+            components: components
+        };
+    }
+}
+
+        const decoder = new DynamicMessageIdDecoder();
+
         let fetchedEmails = [];
         let displayedFilteredEmails = [];
         let activeIndex = null;
@@ -279,9 +423,7 @@
             }
             document.getElementById('credentialsInput').value = localStorage.getItem('yahoo_creds');
 
-            // Load saved source filters from localStorage if available
             loadSavedFilters();
-            
             initTheme();
             updateAccountBadge();
             initCodeMirror();
@@ -345,7 +487,7 @@
         function updateCountdownDisplay() {
             const mins = Math.floor(countdownSeconds / 60);
             const secs = countdownSeconds % 60;
-            const formatted = `${mins}:${secs < 5 ? '0' : ''}${secs}`;
+            const formatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             document.getElementById('timerCountdown').textContent = `Auto-syncing in ${formatted}`;
         }
 
@@ -391,7 +533,6 @@
                         data.emails.forEach(newEmail => {
                             if (!fetchedEmails.some(e => e.id === newEmail.id)) {
                                 fetchedEmails.push(newEmail);
-                                // If no explicit user saved preference exists yet, default newly discovered sources to selected
                                 if (!localStorage.getItem('allmailspot_saved_filters')) {
                                     activeSourceFilters.add(newEmail.source);
                                 }
@@ -440,7 +581,6 @@
             const labelHtml = '<span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1"><i class="fa-solid fa-filter mr-1 text-green-600"></i>Sources:</span>';
             const allSources = [...new Set(fetchedEmails.map(e => e.source))].sort();
             
-            // If filters were never touched, default all discovered sources to active
             if (!localStorage.getItem('allmailspot_saved_filters') && activeSourceFilters.size === 0 && allSources.length > 0) {
                 allSources.forEach(s => activeSourceFilters.add(s));
                 saveFiltersToStorage();
@@ -450,8 +590,8 @@
             allSources.forEach(source => {
                 const isChecked = activeSourceFilters.has(source) ? 'checked' : '';
                 checkboxesHtml += `
-                    <label class="inline-flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-md text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
-                        <input type="checkbox" value="${source}" ${isChecked} onchange="toggleSourceFilter('${source}', this.checked)" class="rounded text-green-600 focus:ring-green-500 h-3.5 w-3.5">
+                    <label class="inline-flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-[11px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <input type="checkbox" value="${source}" ${isChecked} onchange="toggleSourceFilter('${source}', this.checked)" class="rounded text-green-600 focus:ring-green-500 h-3 w-3">
                         <span class="text-slate-700 dark:text-slate-200 font-medium">${source}</span>
                     </label>
                 `;
@@ -505,34 +645,34 @@
 
             emptyState.classList.add('hidden');
 
-            emails.forEach((mail, idx) => {
-                const mainCard = createCardElement(mail, idx);
+            emails.forEach((mail) => {
+                const mainCard = createCardElement(mail);
                 mainGrid.appendChild(mainCard);
 
-                const sideCard = createCardElement(mail, idx, true);
+                const sideCard = createCardElement(mail, true);
                 sideGrid.appendChild(sideCard);
             });
         }
 
-        function createCardElement(mail, idx, isSide = false) {
+        function createCardElement(mail, isSide = false) {
             const card = document.createElement('div');
-            const isActive = isSide && activeIndex === idx;
+            const isActive = isSide && activeIndex !== null && displayedFilteredEmails[activeIndex]?.id === mail.id;
 
-            card.className = `bg-white dark:bg-slate-900 border ${isActive ? 'border-green-600 ring-2 ring-green-600/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500'} rounded-xl p-3 cursor-pointer transition flex flex-col justify-between shadow-xs hover:shadow-md group`;
+            card.className = `bg-white dark:bg-slate-900 border ${isActive ? 'border-green-600 ring-2 ring-green-600/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500'} rounded-xl p-2.5 cursor-pointer transition flex flex-col justify-between shadow-xs hover:shadow-md group`;
             card.onclick = () => selectCardById(mail.id);
 
             card.innerHTML = `
-                <div class="space-y-1.5">
+                <div class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <span class="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[130px]" title="${escapeHTML(mail.from_name)}">${escapeHTML(mail.from_name)}</span>
-                        <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950 px-1.5 py-0.5 rounded border border-green-100 dark:border-green-900">${escapeHTML(mail.source)}</span>
+                        <span class="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[120px]" title="${escapeHTML(mail.from_name)}">${escapeHTML(mail.from_name)}</span>
+                        <span class="text-[9px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950 px-1 py-0.5 rounded border border-green-100 dark:border-green-900">${escapeHTML(mail.source)}</span>
                     </div>
-                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate" title="${escapeHTML(mail.from_email)}">${escapeHTML(mail.from_email)}</div>
-                    <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-xs line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition mt-1" title="${escapeHTML(mail.subject)}">${escapeHTML(mail.subject)}</h4>
+                    <div class="text-[10px] text-slate-400 dark:text-slate-500 truncate" title="${escapeHTML(mail.from_email)}">${escapeHTML(mail.from_email)}</div>
+                    <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-xs line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition" title="${escapeHTML(mail.subject)}">${escapeHTML(mail.subject)}</h4>
                 </div>
 
-                <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
-                    <span class="truncate max-w-[100px]">${escapeHTML(mail.account.split('@')[0])}</span>
+                <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                    <span class="truncate max-w-[90px]">${escapeHTML(mail.account.split('@')[0])}</span>
                     <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-700 group-hover:text-green-600 dark:group-hover:text-green-400 transition"></i>
                 </div>
             `;
@@ -546,12 +686,23 @@
             activeIndex = index;
             const email = displayedFilteredEmails[index];
 
-            document.getElementById('modalSubject').textContent = email.subject;
             document.getElementById('modalFromName').textContent = email.from_name;
             document.getElementById('modalFromEmail').textContent = email.from_email;
-            document.getElementById('modalAccount').textContent = email.account;
-            document.getElementById('modalDate').textContent = email.date;
-            document.getElementById('modalSource').textContent = email.source;
+            document.getElementById('modalSubject').textContent = email.subject;
+            document.getElementById('modalMetaBrief').textContent = `${email.account.split('@')[0]} &bull; ${email.date.substring(0, 16)}`;
+            document.getElementById('modalSourceBadge').textContent = email.source;
+
+            // Original & Dynamic Decoded Return-Path
+            const rawReturnPath = email.return_path || 'N/A';
+            document.getElementById('modalReturnPath').textContent = rawReturnPath;
+            const decodedReturnPathObj = decoder.decode(rawReturnPath);
+            document.getElementById('modalDecodedReturnPath').textContent = decodedReturnPathObj.template;
+
+            // Original & Dynamic Decoded Message-ID
+            const rawMsgId = email.message_id || 'N/A';
+            document.getElementById('modalMessageId').textContent = rawMsgId;
+            const decodedMsgIdObj = decoder.decode(rawMsgId);
+            document.getElementById('modalDecodedMessageId').textContent = decodedMsgIdObj.template;
 
             cmEditor.setValue(email.content);
             updateIframe(email.content);
@@ -566,17 +717,9 @@
             if (displayedFilteredEmails.length === 0 || activeIndex === null) return;
 
             if (direction === 'prev') {
-                if (activeIndex > 0) {
-                    activeIndex--;
-                } else {
-                    activeIndex = displayedFilteredEmails.length - 1;
-                }
+                activeIndex = activeIndex > 0 ? activeIndex - 1 : displayedFilteredEmails.length - 1;
             } else if (direction === 'next') {
-                if (activeIndex < displayedFilteredEmails.length - 1) {
-                    activeIndex++;
-                } else {
-                    activeIndex = 0;
-                }
+                activeIndex = activeIndex < displayedFilteredEmails.length - 1 ? activeIndex + 1 : 0;
             }
 
             const targetMail = displayedFilteredEmails[activeIndex];
@@ -721,15 +864,102 @@
             if (tab === 'preview') {
                 previewView.classList.remove('hidden');
                 editorView.classList.add('hidden');
-                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
-                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
+                tabPreviewBtn.className = "px-3 py-1 rounded-md bg-green-600 text-white font-semibold transition text-xs";
+                tabEditorBtn.className = "px-3 py-1 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition text-xs";
             } else {
                 previewView.classList.add('hidden');
                 editorView.classList.remove('hidden');
-                tabEditorBtn.className = "px-3.5 py-1.5 rounded-lg bg-green-600 text-white font-semibold transition";
-                tabPreviewBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition";
+                tabEditorBtn.className = "px-3 py-1 rounded-md bg-green-600 text-white font-semibold transition text-xs";
+                tabPreviewBtn.className = "px-3 py-1 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition text-xs";
                 cmEditor.refresh();
             }
+        }
+
+        function toggleFindReplaceBar() {
+            switchTab('editor');
+            const bar = document.getElementById('findReplaceBar');
+            bar.classList.toggle('hidden');
+            if (!bar.classList.contains('hidden')) {
+                document.getElementById('findInput').focus();
+            }
+        }
+
+        function executeFind() {
+            const query = document.getElementById('findInput').value;
+            const countEl = document.getElementById('findMatchCount');
+            if (!query) {
+                countEl.textContent = '0 matches';
+                return;
+            }
+
+            let count = 0;
+            const cursor = cmEditor.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+            while (cursor.findNext()) {
+                count++;
+            }
+
+            countEl.textContent = `${count} matches`;
+            if (count > 0) {
+                findNextMatch();
+            }
+        }
+
+        function findNextMatch() {
+            const query = document.getElementById('findInput').value;
+            if (!query) return;
+
+            const cursor = cmEditor.getSearchCursor(query, cmEditor.getCursor(), { caseFold: true });
+            if (cursor.findNext()) {
+                cmEditor.setSelection(cursor.from(), cursor.to());
+                cmEditor.scrollIntoView({ from: cursor.from(), to: cursor.to() }, 100);
+            } else {
+                const wrapCursor = cmEditor.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+                if (wrapCursor.findNext()) {
+                    cmEditor.setSelection(wrapCursor.from(), wrapCursor.to());
+                    cmEditor.scrollIntoView({ from: wrapCursor.from(), to: wrapCursor.to() }, 100);
+                }
+            }
+        }
+
+        function findPreviousMatch() {
+            const query = document.getElementById('findInput').value;
+            if (!query) return;
+
+            const cursor = cmEditor.getSearchCursor(query, cmEditor.getCursor(), { caseFold: true });
+            if (cursor.findPrevious()) {
+                cmEditor.setSelection(cursor.from(), cursor.to());
+                cmEditor.scrollIntoView({ from: cursor.from(), to: cursor.to() }, 100);
+            }
+        }
+
+        function replaceCurrentMatch() {
+            const query = document.getElementById('findInput').value;
+            const replaceVal = document.getElementById('replaceInput').value || '';
+            if (!query) return;
+
+            const sel = cmEditor.getSelection();
+            if (sel.toLowerCase() === query.toLowerCase()) {
+                cmEditor.replaceSelection(replaceVal);
+                findNextMatch();
+                executeFind();
+            } else {
+                findNextMatch();
+            }
+        }
+
+        function replaceAllMatches() {
+            const query = document.getElementById('findInput').value;
+            const replaceVal = document.getElementById('replaceInput').value || '';
+            if (!query) return;
+
+            let count = 0;
+            const cursor = cmEditor.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+            while (cursor.findNext()) {
+                cursor.replace(replaceVal);
+                count++;
+            }
+            showToast(`Replaced ${count} occurrences!`);
+            executeFind();
         }
 
         function findHeadTag() {
