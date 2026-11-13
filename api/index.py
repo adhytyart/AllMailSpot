@@ -21,7 +21,6 @@ def decode_secure_string(encoded_str: str) -> str:
         return encoded_str
 
 def verify_external_credentials(input_id: str, input_pass: str):
-    """Fetches remote auth.json, decrypts credentials, and returns user pass hash if valid."""
     try:
         target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
         response = requests.get(target_url, timeout=5)
@@ -34,14 +33,12 @@ def verify_external_credentials(input_id: str, input_pass: str):
             stored_pass = decode_secure_string(record.get("pass_enc", ""))
             
             if input_id.strip() == stored_id.strip() and input_pass == stored_pass:
-                # Return hash of the verified password for secure session fingerprinting
                 return hashlib.sha256(stored_pass.encode('utf-8')).hexdigest()
         return None
     except Exception:
         return None
 
 def validate_active_session() -> bool:
-    """Checks if the session is valid and ensures the password hasn't been changed in auth.json."""
     if not session.get("authenticated") or not session.get("user") or not session.get("pass_hash"):
         return False
     
@@ -49,7 +46,7 @@ def validate_active_session() -> bool:
         target_url = decode_secure_string(SECURE_CREDS_URL_ENCODED)
         response = requests.get(target_url, timeout=4)
         if response.status_code != 200:
-            return True # Fallback trust if GitHub is temporarily unreachable
+            return True 
             
         credentials_list = response.json()
         current_user = session.get("user")
@@ -61,7 +58,6 @@ def validate_active_session() -> bool:
                 actual_pass = decode_secure_string(record.get("pass_enc", ""))
                 actual_hash = hashlib.sha256(actual_pass.encode('utf-8')).hexdigest()
                 
-                # If password was changed in auth.json, hashes won't match -> invalidate session!
                 if actual_hash == stored_pass_hash:
                     return True
                 else:
@@ -130,10 +126,22 @@ def detect_sending_source(msg, from_email):
         return "SendGrid"
     elif "amazonses" in combined or "amazon" in combined:
         return "Amazon SES"
-    elif "postmark" in combined:
+    elif "postmark" in combined or "pm.mtasv.net" in combined:
         return "Postmark"
+    elif "hubspot" in combined or "hs-tarmail" in combined:
+        return "HubSpot"
+    elif "salesforce" in combined or "exacttarget" in combined or "marketingcloud" in combined:
+        return "Salesforce MC"
+    elif "mailgun" in combined or "mg." in combined:
+        return "Mailgun"
+    elif "brevo" in combined or "sendinblue" in combined:
+        return "Brevo"
+    elif "activecampaign" in combined or "ac-inbox" in combined:
+        return "ActiveCampaign"
     elif "google" in combined or "gmail" in combined:
         return "Google / Gmail"
+    elif "microsoft" in combined or "outlook" in combined or "protection.outlook.com" in combined:
+        return "Microsoft 365"
     elif "smtp" in combined:
         return "SMTP"
     else:
@@ -145,7 +153,6 @@ def detect_sending_source(msg, from_email):
 @app.route("/")
 def home():
     if validate_active_session():
-        # Serve the decoy shell (which loads script.html) while keeping session persistent
         return render_template("shell.html")
     session.clear()
     return render_template("index.html")
@@ -158,7 +165,7 @@ def login_api():
     
     pass_hash = verify_external_credentials(username, password)
     if pass_hash:
-        session.permanent = True # Keeps session active across browser restarts/exits
+        session.permanent = True
         session["authenticated"] = True
         session["user"] = username.strip()
         session["pass_hash"] = pass_hash
@@ -172,7 +179,6 @@ def logout_api():
     return jsonify({"status": "success"})
 
 
-# --- SECURE PAYLOAD LOADER ---
 @app.route("/api/load-payload", methods=["GET"])
 def load_payload():
     if not validate_active_session():
@@ -189,7 +195,6 @@ def load_payload():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# --- PROTECTED IMAP CHUNK FETCHING ---
 @app.route("/api/fetch-chunk", methods=["POST"])
 def fetch_chunk_api():
     if not validate_active_session():
@@ -247,6 +252,16 @@ def fetch_chunk_api():
                     from_email = email_addr if email_addr else from_str
                     date_sent = msg.get("Date", "")
                     
+                    raw_message_id = msg.get("Message-ID", "")
+                    clean_msg_id = raw_message_id.strip()
+                    if clean_msg_id.startswith("<") and clean_msg_id.endswith(">"):
+                        clean_msg_id = clean_msg_id[1:-1].strip()
+                    
+                    return_path_raw = msg.get("Return-Path", "")
+                    clean_return_path = return_path_raw.strip()
+                    if clean_return_path.startswith("<") and clean_return_path.endswith(">"):
+                        clean_return_path = clean_return_path[1:-1].strip()
+
                     source_type = detect_sending_source(msg, from_email)
                     body_content = extract_email_body(msg)
                     
@@ -258,7 +273,9 @@ def fetch_chunk_api():
                         "subject": subject,
                         "date": date_sent,
                         "source": source_type,
-                        "content": body_content
+                        "content": body_content,
+                        "message_id": clean_msg_id,
+                        "return_path": clean_return_path
                     })
                 except Exception:
                     continue
